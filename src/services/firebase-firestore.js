@@ -3,18 +3,37 @@ const admin = require('firebase-admin');
 const db = admin.firestore();
 
 class FirebaseFirestore {
-    async addData(collection, data) {
+    async addData(collection, data, id) {
         return new Promise(async (resolve, reject) => {
-            const reuslt = await db.collection(collection).add(data).catch(reject);
-            console.log(reuslt);
-            resolve(reuslt);  
+            let ref;
+            if(id){
+                ref = db.collection(collection).doc(id).set(data);
+            }else{
+                ref = db.collection(collection).add(data);
+            }
+            const result = await ref.catch(reject);
+            //console.log(result);
+            resolve(result);  
         })   
+    }
+    async updateData(collection, id, data) {
+        return new Promise(async (resolve, reject) => {
+            const result = await db.collection(collection).doc(id).update(data).catch(reject);
+            //console.log(result);
+            resolve(result);  
+        })   
+    }
+    async getSingleData(collection, id) {
+        return new Promise(async (resolve, reject) => {
+            const doc = await db.collection(collection).doc(id).get().catch(reject);
+            if(doc.exists) resolve(doc.data());
+            resolve(null);
+        });
     }
     async getAllData(collection) {
         return new Promise(async (resolve, reject) => {
-            const reuslt = await db.collection(collection).get().catch(reject);
-            console.log(reuslt);
-            resolve(reuslt.docs.map(doc => ({id: doc.id, data: doc.data()})));  
+            const result = await db.collection(collection).get().catch(reject);
+            resolve(result.docs.map(doc => ({id: doc.id, data: doc.data()})));  
         });
     }
 }

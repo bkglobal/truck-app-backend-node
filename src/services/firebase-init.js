@@ -1,11 +1,9 @@
 var admin = require("firebase-admin");
 
-var serviceAccount = require("../../private/truckloader-app-firebase-adminsdk-xwva3-d447df230d.json");
-
+var serviceAccount = require("../../private/hairdos-52cdc-firebase-adminsdk-bfvpj-f559501825.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
 module.exports = admin;
 
 // firebaseAdmin.auth().

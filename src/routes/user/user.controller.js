@@ -1,139 +1,310 @@
 const User = require("../../database/user");
-const Truck = require("../../database/truck");
 const Load = require("../../database/load");
 const firebaseAuthentication = require("../../services/firebase-authentication");
-const codes = require("../../helper/status-codes");
+const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/status-CODES.json");
 const utils = require("../../helper/utils");
 
 function response(res, code, data) {
     res.status(code);
-    res.json(data);
+    res.json({ data: data, msg: MESSAGES[code] });
     res.end();
 }
 
 class UserController {
-    async getUsers(req, res) {
-        try {
-            console.log('getting users');
-            const user = new User({});
-            user.getAll().then(allUsers => {
-                console.log(allUsers);
-                return res.status(200).send({ result: allUsers })
-            }).catch(error => {
-                console.log(error);
-                return res.status(400).send({ error });
-            });
-        } catch (error) {
-            console.log(error);
-            return res.status(400).send({ error });
-        }
-    }
+    //Registering
     async signup(req, res) {
         try {
             console.log("signup");
             let data = req.body;
-            let { email, password, truck } = data;
-            if (!email || !password) return response(res, codes.Bad_Request, { error: "email|password required" });
+            let { email, password } = data;
+            if (!email || !password) return response(res, CODES.Bad_Request, { error: "email|password required" });
             firebaseAuthentication.createUser({ email, password }).then(async authResult => {
-                if (data.truck) {
-                    var userTruck = new Truck(data.truck);
-                    var truck = await userTruck.save();
-                    data["truckId"] = truck.id;
-                }
-                let user = new User({ uid: authResult.uid, ...data });
+                data["uid"] = authResult.uid;
+                let user = new User(data);
                 user.save().then(userRes => {
-                    return response(res, codes.OK, authResult);
+                    return response(res, CODES.OK, authResult);
                 }).catch(error => {
-                    return response(res, codes.Internal_Server_Error, { error });
+                    return response(res, CODES.Internal_Server_Error, { error });
                 });
-            }).catch(error => { return response(res, codes.Internal_Server_Error, { error }); });
+            }).catch(error => { return response(res, CODES.Internal_Server_Error, { error }); });
         } catch (error) {
-            return response(res, codes.Bad_Request, { error });
+            return response(res, CODES.Bad_Request, { error });
         }
     }
-    async uploadCarrierDocument(req, res) {
+    async saveCarrierDocument(req, res) {
         try {
-            console.log("uploadCarrierDocument");
-            let { uid } = req.params;
+            console.log("saveCarrierDocument");
+            let { userId } = req.query;
             let files = req.files && req.files.file;
-            if (!files) return response(res, codes.Bad_Request, { error: "invalid request" });
+            if (!userId || !files) return response(res, CODES.Bad_Request, { error: "userId|file request" });
             if (!Array.isArray(files)) files = [files];
             let date = new Date();
             let fileUrls = [];
             files.forEach(file => {
                 let fileUrl = `${utils.fileUploadPath}/${date.getTime()}-${file.name}`;
                 fileUrls.push(fileUrl)
-                utils.uploadFile(file, fileUrl).catch(error => { return response(res, codes.Internal_Server_Error, { error }); });
+                utils.uploadFile(file, fileUrl).catch(error => { return response(res, CODES.Internal_Server_Error, { error }); });
             });
             let user = new User({});
-            user.update(uid, { carrierDocuments: fileUrls }).then(userRes => {
-                return response(res, codes.OK, userRes);
+            user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
+                return response(res, CODES.OK, userRes);
             }).catch(error => {
-                return response(res, codes.Internal_Server_Error, { error });
+                return response(res, CODES.Internal_Server_Error, { error });
             });
         } catch (error) {
-            return response(res, codes.Bad_Request, { error });
+            return response(res, CODES.Bad_Request, { error });
         }
     }
-    async postUserLoad(req, res) {
+    //Premium Plans
+    async savePremiumPlan(req, res) {
         try {
-            console.log("postUserLoad");
-            let { uid } = req.params;
+            console.log("savePremiumPlan");
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getPremiumPlans(req, res) {
+        try {
+            console.log("getPremiumPlans");
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    //Controller as User
+    async saveUserLoad(req, res) {
+        try {
+            console.log("saveUserLoad");
+            let { userId } = req.query;
+            if (!userId) return response(res, CODES.Bad_Request, { error: "userId required" });
             let data = req.body;
-            data["userId"] = uid;
+            data["userId"] = userId;
             let load = new Load(data);
-            load.save().then((loadRes) => {
-                return response(res, codes.OK, loadRes);
+            load.save().then(() => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.CREATED);
             }).catch(error => {
-                return response(res, codes.Internal_Server_Error, { error });
+                return response(res, CODES.Internal_Server_Error, { error });
             });
         } catch (error) {
-            return response(res, codes.Bad_Request, { error });
+            return response(res, CODES.Bad_Request, { error });
         }
     }
-    async getUserLoad(req, res) {
+    async getUserLoads(req, res) {
         try {
-            console.log("getUserLoad");
-            let { uid, idl } = req.params;
-            console.log(idl);
+            console.log("getUserLoads");
+            let { userId } = req.query;
+            if (!userId) return response(res, CODES.Bad_Request, { error: "userId required" });
             let load = new Load({});
-            load.getLoad(idl).then((loadRes) => {
-                return response(res, codes.OK, loadRes);
+            load.getAllUserLoads(userId).then((loadRes) => {
+                return response(res, CODES.OK, loadRes);
             }).catch(error => {
-                return response(res, codes.Internal_Server_Error, { error });
+                return response(res, CODES.Internal_Server_Error, { error });
             });
         } catch (error) {
-            return response(res, codes.Bad_Request, { error });
+            return response(res, CODES.Bad_Request, { error });
         }
     }
-    async getSearchTrucks(req, res) {
+    async getLoadDetail(req, res) {
         try {
-            console.log("getSearchTrucks");
-            let { address } = req.query;
-
-            // let load = new Load({});
-            // load.getLoad(idl).then((loadRes) => {
-            //     return response(res, codes.OK, loadRes);
-            // }).catch(error => {
-            //     return response(res, codes.Internal_Server_Error, { error });
-            // });
+            console.log("getLoadDetail");
+            let { loadId } = req.query;
+            if (!loadId) return response(res, CODES.Bad_Request, { error: "loadId required" });
+            let load = new Load({});
+            load.getLoad(loadId).then((loadRes) => {
+                return response(res, CODES.OK, loadRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
-            return response(res, codes.Bad_Request, { error });
+            return response(res, CODES.Bad_Request, { error });
         }
     }
+    async getSearchTruckers(req, res) {
+        try {
+            console.log("getSearchTruckers");
+            let { address } = req.query;
+            if (!address) return response(res, CODES.Bad_Request, { error: "address required" });
+            let user = new User({});
+            user.getAllSearchUsers(address.toLowerCase()).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            console.log(error);
+            return response(res, CODES.Bad_Request, error);
+        }
+    }
+    async getTruckerDetail(req, res) {
+        try {
+            console.log("getTruckerDetail");
+            let { truckUserId } = req.query;
+            if (!truckUserId) return response(res, CODES.Bad_Request, { error: "truckUserId required" });
+            let user = new User({});
+            user.getSingleUser(truckUserId).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async saveTruckerRating(req, res) {
+        try {
+            console.log("saveTruckerRating");
+            let { loadId } = req.query;
+            let { rating } = req.body;
+            if (!loadId || !rating) return response(res, CODES.Bad_Request, { error: "loadId|rating id required" });
+            let load = new Load({});
+            load.saveTruckerRating(loadId, rating).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getTruckerRatings(req, res) {
+        try {
+            console.log("getTruckerRatings");
+
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async saveFavTruckerProfile(req, res) {
+        try {
+            console.log("saveFavTruckerProfile");
+
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getFavTruckerProfiles(req, res) {
+        try {
+            console.log("getFavTruckerProfiles");
+
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    //Controller as Trucker
     async getSearchLoads(req, res) {
         try {
             console.log("getSearchLoads");
-            let { uid, idl } = req.params;
-            console.log(idl);
+            let { shippingItem } = req.query;
+            if (!shippingItem) return response(res, CODES.Bad_Request, { error: "shippingItem required" });
             let load = new Load({});
-            load.getLoad(idl).then((loadRes) => {
-                return response(res, codes.OK, loadRes);
+            load.getAllSearchLoads(parseInt(shippingItem)).then((loadRes) => {
+                return response(res, CODES.OK, loadRes);
             }).catch(error => {
-                return response(res, codes.Internal_Server_Error, { error });
+                return response(res, CODES.Internal_Server_Error, { error });
             });
         } catch (error) {
-            return response(res, codes.Bad_Request, { error });
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async saveLoadBook(req, res) {
+        try {
+            console.log("saveLoadBook");
+            let { loadId } = req.query;
+            let { truckUserId } = req.body;
+            if (!loadId || !truckUserId) return response(res, CODES.Bad_Request, { error: "loadId|truckUserId required" });
+            let load = new Load({});
+            load.update(loadId, { truckUserId }).then(() => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async updateLoadStatus(req, res) {
+        try {
+            console.log("updateLoadStatus");
+            let { loadId } = req.query;
+            let { statusShipping } = req.body;
+            if (!loadId || !statusShipping) return response(res, CODES.Bad_Request, { error: "loadId|statusShipping required" });
+            let load = new Load({});
+            load.update(loadId, { statusShipping }).then(() => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getUserDetail(req, res) {
+        try {
+            console.log("getUserDetail");
+            let { userId } = req.query;
+            if (!userId) return response(res, CODES.Bad_Request, { error: "userId required" });
+            let user = new User({});
+            user.getSingleUser(userId).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async saveUserRating(req, res) {
+        try {
+            console.log("saveUserRating");
+            let { loadId } = req.query;
+            let { rating } = req.body;
+            if (!loadId || !rating) return response(res, CODES.Bad_Request, { error: "loadId|rating required" });
+            let load = new Load({});
+            load.saveUserRating(loadId, rating).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getUserRatings(req, res) {
+        try {
+            console.log("getUserRatings");
+
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getTruckerLoads(req, res) {
+        try {
+            console.log("getTruckerLoads");
+            let { truckUserId } = req.query;
+            if (!truckUserId) return response(res, CODES.Bad_Request, { error: "truckUserId required" });
+            let load = new Load({});
+            load.getAllTruckerLoads(truckUserId).then((loadRes) => {
+                return response(res, CODES.OK, loadRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async saveFavLoad(req, res) {
+        try {
+            console.log("saveFavLoad");
+
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getFavLoads(req, res) {
+        try {
+            console.log("getFavLoads");
+
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
         }
     }
 }

@@ -19,7 +19,6 @@ class FirebaseFirestore {
     async updateData(collection, id, data) {
         return new Promise(async (resolve, reject) => {
             const result = await db.collection(collection).doc(id).update(data).catch(reject);
-            //console.log(result);
             resolve(result);  
         })   
     }
@@ -33,6 +32,14 @@ class FirebaseFirestore {
     async getAllData(collection) {
         return new Promise(async (resolve, reject) => {
             const result = await db.collection(collection).get().catch(reject);
+            resolve(result.docs.map(doc => ({id: doc.id, data: doc.data()})));  
+        });
+    }
+    async getAllDataWithCriteria(collection, arrWhereClauses) {
+        return new Promise(async (resolve, reject) => {
+            let query = db.collection(collection);
+            arrWhereClauses.forEach((clause) => {query = query.where(...clause)});
+            const result = await query.get().catch(reject);
             resolve(result.docs.map(doc => ({id: doc.id, data: doc.data()})));  
         });
     }

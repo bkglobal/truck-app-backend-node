@@ -11,7 +11,8 @@ class Load {
         dropOffAddress = null,
         dateTime = null,
         priceRange = null,
-        statusShipping = "NEW"
+        statusShipping = "NEW",
+        shippingItem = null
     }) {
         this.collection = 'Loads';
         this.userId = userId;
@@ -24,6 +25,7 @@ class Load {
         this.dateTime = dateTime;
         this.priceRange = priceRange;
         this.statusShipping = statusShipping;
+        this.shippingItem = shippingItem;
         this.createdAt = new Date().toLocaleString();
     }
     async save() {
@@ -38,20 +40,55 @@ class Load {
             dateTime: this.dateTime,
             priceRange: this.priceRange,
             statusShipping: this.statusShipping,
+            shippingItem: this.shippingItem,
+            rating: {
+                truckerRating: null,
+                userRating: null
+            },
             createdAt: this.createdAt
         }).catch((error) => {
             return error;
         });
         return result;
     }
-    async getLoad(id){
+    async update(id, data) {
+        const result = await firebaseFirestore.updateData(this.collection, id, data).catch((error) => {
+            return error;
+        });
+        return result;
+    }
+    async getLoad(id) {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch((error) => {
             return error;
         });
         return result;
     }
-    async getAll() {
-        const result = await firebaseFirestore.getAllData(this.collection).catch((error) => {
+    async getAllUserLoads(userId) {
+        const result = await firebaseFirestore.getAllDataWithCriteria(this.collection, [["userId", "==", userId]]).catch((error) => {
+            return error;
+        });
+        return result;
+    }
+    async getAllTruckerLoads(truckUserId) {
+        const result = await firebaseFirestore.getAllDataWithCriteria(this.collection, [["truckUserId", "==", truckUserId]]).catch((error) => {
+            return error;
+        });
+        return result;
+    }
+    async getAllSearchLoads(shippingItem) {
+        const result = await firebaseFirestore.getAllDataWithCriteria(this.collection, [["shippingItem", "==", shippingItem]]).catch((error) => {
+            return error;
+        });
+        return result;
+    }
+    async saveTruckerRating(id, rating) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "rating.truckerRating": rating }).catch((error) => {
+            return error;
+        });
+        return result;
+    }
+    async saveUserRating(id, rating) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "rating.userRating": rating }).catch((error) => {
             return error;
         });
         return result;

@@ -3,7 +3,6 @@ const firebaseFirestore = require("../services/firebase-firestore");
 class User {
     constructor({
         uid = null,
-        truckId = null,
         packageId = null,
         name = null,
         email = null,
@@ -12,11 +11,11 @@ class User {
         address = null,
         phoneNumber = null,
         carrierDocuments = null,
-        savedTruckUserIds = null
+        savedTruckUserIds = null,
+        truck = null
     }) {
         this.collection = 'Users';
         this.uid = uid;
-        this.truckId = truckId;
         this.packageId = packageId;
         this.name = name;
         this.email = email;
@@ -26,22 +25,33 @@ class User {
         this.phoneNumber = phoneNumber;
         this.carrierDocuments = carrierDocuments;
         this.savedTruckUserIds = savedTruckUserIds;
+        this.hasOwnTruck = false;
+        this.truck = {};
+        if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference)) {
+            this.hasOwnTruck = true;
+            this.truck.truckType = truck.truckType;
+            this.truck.skidCapacity = truck.skidCapacity;
+            this.truck.drivingExperience = truck.drivingExperience;
+            this.truck.isInsured = truck.isInsured || false;
+            this.truck.travelPreference = truck.travelPreference;
+        }
         this.createdAt = new Date().toLocaleString();
     }
 
     async save() {
         const result = await firebaseFirestore.addData(this.collection, {
             uid: this.uid,
-            truckId: this.truckId,
             packageId: this.packageId,
             name: this.name,
             email: this.email,
             companyName: this.companyName,
             businessNumber: this.businessNumber,
-            address: this.address,
+            address: this.address.toLowerCase(),
             phoneNumber: this.phoneNumber,
             carrierDocuments: this.carrierDocuments,
             savedTruckUserIds: this.savedTruckUserIds,
+            hasOwnTruck: this.hasOwnTruck,
+            truck: this.truck,
             createdAt: this.createdAt
         }, this.uid).catch((error) => {
             return error;
@@ -54,9 +64,13 @@ class User {
         });
         return result;
     }
-    async getAll() {
-        const result = await firebaseFirestore.getAllData(this.collection).catch(error => {return error});
+    async getSingleUser(id) {
+        const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { return error });
         return result;
+    }
+    async getAllSearchUsers(address) {
+        const result = await firebaseFirestore.getAllDataWithCriteria(this.collection, [['address', '>=', address], ['address', '<=', address + '\uf8ff']]).catch(error => { return error });
+        return result.filter((doc)=> {return doc.data.hasOwnTruck == true});
     }
 }
 

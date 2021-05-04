@@ -154,7 +154,7 @@ class UserController {
             console.log("saveTruckerRating");
             let { loadId } = req.query;
             let { rating } = req.body;
-            if (!loadId || !rating) return response(res, CODES.Bad_Request, { error: "loadId|rating id required" });
+            if (!loadId || !rating) return response(res, CODES.Bad_Request, { error: "loadId|rating required" });
             let load = new Load({});
             load.saveTruckerRating(loadId, rating).then((usersRes) => {
                 return response(res, CODES.OK, usersRes);
@@ -168,7 +168,20 @@ class UserController {
     async getTruckerRatings(req, res) {
         try {
             console.log("getTruckerRatings");
-
+            let { truckUserId } = req.query;
+            if (!truckUserId) return response(res, CODES.Bad_Request, { error: "truckUserId required" });
+            let load = new Load({});
+            load.getAllTruckerLoads(truckUserId).then((loadRes) => {
+                loadRes = loadRes.map((load) => ({
+                    loadId: load.id,
+                    truckUserId: load.data.truckUserId,
+                    userId: load.data.userId,
+                    ...load.data.rating
+                }));
+                return response(res, CODES.OK, loadRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }
@@ -176,7 +189,15 @@ class UserController {
     async saveFavTruckerProfile(req, res) {
         try {
             console.log("saveFavTruckerProfile");
-
+            let { userId } = req.query;
+            let { favTruckUserIds } = req.body;
+            if (!userId || !favTruckUserIds) return response(res, CODES.Bad_Request, { error: "userId|favTruckUserIds required" });
+            let user = new User({});
+            user.update(userId, { favTruckUserIds }).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }
@@ -184,7 +205,14 @@ class UserController {
     async getFavTruckerProfiles(req, res) {
         try {
             console.log("getFavTruckerProfiles");
-
+            let { userId } = req.query;
+            if (!userId) return response(res, CODES.Bad_Request, { error: "userId required" });
+            let user = new User({});
+            user.getSingleUser(userId).then((usersRes) => {
+                return response(res, CODES.OK, { favTruckUserIds: usersRes.favTruckUserIds });
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }
@@ -271,7 +299,20 @@ class UserController {
     async getUserRatings(req, res) {
         try {
             console.log("getUserRatings");
-
+            let { userId } = req.query;
+            if (!userId) return response(res, CODES.Bad_Request, { error: "userId required" });
+            let load = new Load({});
+            load.getAllUserLoads(userId).then((loadRes) => {
+                loadRes = loadRes.map((load) => ({
+                    loadId: load.id,
+                    truckUserId: load.data.truckUserId,
+                    userId: load.data.userId,
+                    ...load.data.rating
+                }));
+                return response(res, CODES.OK, loadRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }
@@ -294,7 +335,15 @@ class UserController {
     async saveFavLoad(req, res) {
         try {
             console.log("saveFavLoad");
-
+            let { truckUserId } = req.query;
+            let { favLoadIds } = req.body;
+            if (!truckUserId || !favLoadIds) return response(res, CODES.Bad_Request, { error: "truckUserId|favLoadIds required" });
+            let user = new User({});
+            user.update(truckUserId, { "truck.favLoadIds": favLoadIds }).then((usersRes) => {
+                return response(res, CODES.OK, usersRes);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }
@@ -302,7 +351,14 @@ class UserController {
     async getFavLoads(req, res) {
         try {
             console.log("getFavLoads");
-
+            let { truckUserId } = req.query;
+            if (!truckUserId) return response(res, CODES.Bad_Request, { error: "truckUserId required" });
+            let user = new User({});
+            user.getSingleUser(truckUserId).then((usersRes) => {
+                return response(res, CODES.OK, { favLoadIds: usersRes.truck.favLoadIds });
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }

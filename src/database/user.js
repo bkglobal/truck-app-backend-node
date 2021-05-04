@@ -11,7 +11,7 @@ class User {
         address = null,
         phoneNumber = null,
         carrierDocuments = null,
-        savedTruckUserIds = null,
+        favTruckUserIds = [],
         truck = null
     }) {
         this.collection = 'Users';
@@ -24,7 +24,7 @@ class User {
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.carrierDocuments = carrierDocuments;
-        this.savedTruckUserIds = savedTruckUserIds;
+        this.favTruckUserIds = favTruckUserIds;
         this.hasOwnTruck = false;
         this.truck = {};
         if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference)) {
@@ -34,6 +34,7 @@ class User {
             this.truck.drivingExperience = truck.drivingExperience;
             this.truck.isInsured = truck.isInsured || false;
             this.truck.travelPreference = truck.travelPreference;
+            this.favLoadIds = [];
         }
         this.createdAt = new Date().toLocaleString();
     }
@@ -49,7 +50,7 @@ class User {
             address: this.address.toLowerCase(),
             phoneNumber: this.phoneNumber,
             carrierDocuments: this.carrierDocuments,
-            savedTruckUserIds: this.savedTruckUserIds,
+            favTruckUserIds: this.favTruckUserIds,
             hasOwnTruck: this.hasOwnTruck,
             truck: this.truck,
             createdAt: this.createdAt

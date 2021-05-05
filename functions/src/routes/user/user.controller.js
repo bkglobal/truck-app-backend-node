@@ -3,12 +3,17 @@ const Load = require("../../database/load");
 const firebaseAuthentication = require("../../services/firebase-authentication");
 const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/status-CODES.json");
 const utils = require("../../helper/utils");
-
+const logger = require("firebase-functions/lib/logger");
 function response(res, code, data) {
     res.status(code);
     res.json({ data: data, msg: MESSAGES[code] });
     res.end();
 }
+
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
+const Busboy = require('busboy');
 
 class UserController {
     //Registering
@@ -33,24 +38,61 @@ class UserController {
     }
     async saveCarrierDocument(req, res) {
         try {
-            console.log("saveCarrierDocument");
             let { userId } = req.query;
-            let files = req.files && req.files.file;
-            if (!userId || !files) return response(res, CODES.Bad_Request, { error: "userId|file request" });
-            if (!Array.isArray(files)) files = [files];
-            let date = new Date();
-            let fileUrls = [];
-            files.forEach(file => {
-                let fileUrl = `${utils.fileUploadPath}/${date.getTime()}-${file.name}`;
-                fileUrls.push(fileUrl)
-                utils.uploadFile(file, fileUrl).catch(error => { return response(res, CODES.Internal_Server_Error, { error }); });
+            if (!userId) return response(res, CODES.Bad_Request, { error: "userId required" });
+            const busboy = new Busboy({ headers: req.headers });
+            const dir = "public/docs";
+            const uploads = {};
+            const fileWrites = [];
+            busboy.on('file', (fieldname, file, filename) => {
+                const filepath = `${dir}/${Date.now()}-${filename}`///path.join(dir, `${Date.now()}-${filename}`);
+                uploads[fieldname] = filepath;
+                const writeStream = fs.createWriteStream(filepath);
+                file.pipe(writeStream);
+                const promise = new Promise((resolve, reject) => {
+                    file.on('end', () => {
+                        writeStream.end();
+                    });
+                    writeStream.on('finish', resolve);
+                    writeStream.on('error', reject);
+                });
+                fileWrites.push(promise);
             });
-            let user = new User({});
-            user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
-                return response(res, CODES.OK, userRes);
-            }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+            busboy.on('finish', async () => {
+                await Promise.all(fileWrites);
+                /**
+                 * TODO(developer): Process saved files here
+                 */
+                let user = new User({});
+                user.update(userId, { carrierDocuments: uploads.file }).then(userRes => {
+                    response(res, CODES.OK, userRes);
+                }).catch(error => {
+                    response(res, CODES.Internal_Server_Error, { error });
+                });
             });
+            busboy.end(req.rawBody);
+            /////
+            ///
+            // console.log("saveCarrierDocument");
+            // let { userId } = req.query;
+            // let files = req.files && req.files.file;
+            // console.log((req.files));
+            // if (!userId || !files) return response(res, CODES.Bad_Request, { error: "userId|file required" });
+            // if (!Array.isArray(files)) files = [files];
+            // let date = new Date();
+            // let fileUrls = [];
+            // files.forEach(file => {
+            //     let fileUrl = `${utils.fileUploadPath}/${date.getTime()}-${file.name}`;
+            //     fileUrls.push(fileUrl)
+            //     utils.uploadFile(file, fileUrl).catch(error => { return response(res, CODES.Internal_Server_Error, { error }); });
+            // });
+            // let user = new User({});
+            // user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
+            //     return response(res, CODES.OK, userRes);
+            // }).catch(error => {
+            //     return response(res, CODES.Internal_Server_Error, { error });
+            // });
+            // return req.pipe(busboy);
         } catch (error) {
             return response(res, CODES.Bad_Request, { error });
         }

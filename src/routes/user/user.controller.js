@@ -198,7 +198,7 @@ class UserController {
             if (!loadId || !rating) return response(res, CODES.Bad_Request, { error: "loadId|rating required" });
             let load = new Load({});
             load.saveTruckerRating(loadId, rating).then((usersRes) => {
-                return response(res, CODES.OK, usersRes);
+                return response(res, CODES.OK, RESOURCE_OPERATION.CREATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -329,7 +329,7 @@ class UserController {
             if (!loadId || !rating) return response(res, CODES.Bad_Request, { error: "loadId|rating required" });
             let load = new Load({});
             load.saveUserRating(loadId, rating).then((usersRes) => {
-                return response(res, CODES.OK, usersRes);
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });

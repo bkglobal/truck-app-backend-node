@@ -1,7 +1,9 @@
 var express = require('express');
 var userRoute = require('./user/user.routes');
-var app = express.Router();
+var adminRoute = require('./admin/admin.routes');
+var router = express.Router();
 
-app.use('/user', userRoute);
+router.use('/user', userRoute);
+router.use('/admin', adminRoute);
 
-module.exports = app;
+module.exports = router;

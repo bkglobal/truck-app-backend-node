@@ -65,6 +65,10 @@ class User {
         });
         return result;
     }
+    async getAllUsers() {
+        const result = await firebaseFirestore.getAllData(this.collection).catch(error => { return error });
+        return result;
+    }
     async getSingleUser(id) {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { return error });
         return result;

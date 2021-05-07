@@ -1,5 +1,5 @@
 const {request, response} = require('express');
-const statusCodes = require('../helper/status-codes');
+const statusCodes = require('../helper/statusCodes.json');
 const firebaseAuthentication = require("../services/firebase-authentication")
 
     /**

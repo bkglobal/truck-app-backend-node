@@ -1,7 +1,7 @@
 const User = require("../../database/user");
 const Load = require("../../database/load");
 const firebaseAuthentication = require("../../services/firebase-authentication");
-const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/status-CODES.json");
+const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/statusCodes.json");
 const utils = require("../../helper/utils");
 const logger = require("firebase-functions/lib/logger");
 function response(res, code, data) {

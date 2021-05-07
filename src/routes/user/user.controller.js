@@ -9,7 +9,6 @@ function response(res, code, data) {
     res.json({ data: data, msg: MESSAGES[code] });
     res.end();
 }
-let a;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -89,7 +88,7 @@ class UserController {
             });
             let user = new User({});
             user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
-                return response(res, CODES.OK, userRes);
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -236,7 +235,7 @@ class UserController {
             if (!userId || !favTruckUserIds) return response(res, CODES.Bad_Request, { error: "userId|favTruckUserIds required" });
             let user = new User({});
             user.update(userId, { favTruckUserIds }).then((usersRes) => {
-                return response(res, CODES.OK, usersRes);
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -382,7 +381,7 @@ class UserController {
             if (!truckUserId || !favLoadIds) return response(res, CODES.Bad_Request, { error: "truckUserId|favLoadIds required" });
             let user = new User({});
             user.update(truckUserId, { "truck.favLoadIds": favLoadIds }).then((usersRes) => {
-                return response(res, CODES.OK, usersRes);
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });

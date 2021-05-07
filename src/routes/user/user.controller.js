@@ -1,7 +1,7 @@
 const User = require("../../database/user");
 const Load = require("../../database/load");
 const firebaseAuthentication = require("../../services/firebase-authentication");
-const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/status-CODES.json");
+const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/status-codes.json");
 const utils = require("../../helper/utils");
 const logger = require("firebase-functions/lib/logger");
 function response(res, code, data) {
@@ -9,7 +9,7 @@ function response(res, code, data) {
     res.json({ data: data, msg: MESSAGES[code] });
     res.end();
 }
-
+let a;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');

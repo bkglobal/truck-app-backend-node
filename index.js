@@ -19,10 +19,8 @@ app.use('/public', express.static(path.resolve(__dirname, 'public')));
 app.use('/api/v1/', routes);
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
-
+let abc = 0;
 exports.app = functions.https.onRequest(app);
-
-
 
 // const functions = require('firebase-functions');
 // const express = require('express');

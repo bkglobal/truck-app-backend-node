@@ -2,10 +2,10 @@ const firebaseFirestore = require("../services/firebase-firestore");
 
 class FreePlan {
     constructor({
-        name = null,
-        userLoadLimit = null,
-        truckerLoadLimit = null,
-        description = null
+        name = "",
+        userLoadLimit = 0,
+        truckerLoadLimit = 0,
+        description = ""
     }) {
         this.collection = 'FreePlan';
         this.id = 'plan1'

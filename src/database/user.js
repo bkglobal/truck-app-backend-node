@@ -2,15 +2,15 @@ const firebaseFirestore = require("../services/firebase-firestore");
 
 class User {
     constructor({
-        uid = null,
-        packageId = null,
-        name = null,
-        email = null,
-        companyName = null,
-        businessNumber = null,
-        address = null,
-        phoneNumber = null,
-        carrierDocuments = null,
+        uid = "",
+        packageId = "",
+        name = "",
+        email = "",
+        companyName = "",
+        businessNumber = "",
+        address = "",
+        phoneNumber = "",
+        carrierDocuments = [],
         favTruckUserIds = [],
         truck = null
     }) {

@@ -2,17 +2,17 @@ const firebaseFirestore = require("../services/firebase-firestore");
 
 class Load {
     constructor({
-        userId = null,
-        truckUserId = null,
-        loadItemName = null,
-        skidCount = null,
-        weight = null,
-        pickupAddress = null,
-        dropOffAddress = null,
-        dateTime = null,
-        priceRange = null,
+        userId = "",
+        truckUserId = "",
+        loadItemName = "",
+        skidCount = 0,
+        weight = 0,
+        pickupAddress = "",
+        dropOffAddress = "",
+        dateTime = "",
+        priceRange = 0,
         statusShipping = "NEW",
-        shippingItem = null
+        shippingItem = 0
     }) {
         this.collection = 'Loads';
         this.userId = userId;
@@ -42,8 +42,8 @@ class Load {
             statusShipping: this.statusShipping,
             shippingItem: this.shippingItem,
             rating: {
-                truckerRating: null,
-                userRating: null
+                truckerRating: 0,
+                userRating: 0
             },
             createdAt: this.createdAt
         }).catch((error) => {

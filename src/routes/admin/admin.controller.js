@@ -1,4 +1,6 @@
 const User = require("../../database/user");
+const FreePlan = require("../../database/free-plan");
+const Package = require("../../database/package");
 const Load = require("../../database/load");
 const firebaseAuthentication = require("../../services/firebase-authentication");
 const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/statusCodes.json");
@@ -33,12 +35,26 @@ class UserController {
         }
     }
     //Free Plan
+    async saveFreePlan(req, res) {
+        try {
+            console.log("saveFreePlan");
+            let plan = new FreePlan(req.body);
+            plan.save().then(planRes => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.CREATED);
+            }).catch(error => {
+                return response(res, CODES.Internal_Server_Error, { error });
+            });
+        } catch (error) {
+            console.log(error);
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
     async getFreePlan(req, res) {
         try {
             console.log("getFreePlan");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let plan = new FreePlan({});
+            plan.getPlan().then(planRes => {
+                return response(res, CODES.OK, planRes);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -50,9 +66,9 @@ class UserController {
     async updateFreePlan(req, res) {
         try {
             console.log("updateFreePlan");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let plan = new FreePlan({});
+            plan.update(req.body).then(planRes => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -65,9 +81,9 @@ class UserController {
     async getAllPackages(req, res) {
         try {
             console.log("getAllPackages");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let obj = new Package({});
+            obj.getAll().then(packageRes => {
+                return response(res, CODES.OK, packageRes);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -79,9 +95,9 @@ class UserController {
     async savePackage(req, res) {
         try {
             console.log("savePackage");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let obj = new Package(req.body);
+            obj.save().then(objRes => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.CREATED);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -93,9 +109,11 @@ class UserController {
     async getPackage(req, res) {
         try {
             console.log("getPackage");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let { packageId } = req.query;
+            if (!packageId) return response(res, CODES.Bad_Request, { error: "packageId required" });
+            let obj = new Package({});
+            obj.get(packageId).then(result => {
+                return response(res, CODES.OK, result);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });
@@ -107,10 +125,13 @@ class UserController {
     async updatePackage(req, res) {
         try {
             console.log("updatePackage");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let { packageId } = req.query;
+            if (!packageId) return response(res, CODES.Bad_Request, { error: "packageId required" });
+            let obj = new Package(req.body);
+            obj.update(packageId).then(result => {
+                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
             }).catch(error => {
+                console.log(error);
                 return response(res, CODES.Internal_Server_Error, { error });
             });
         } catch (error) {
@@ -121,9 +142,11 @@ class UserController {
     async deletePackage(req, res) {
         try {
             console.log("deletePackage");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
+            let { packageId } = req.query;
+            if (!packageId) return response(res, CODES.Bad_Request, { error: "packageId required" });
+            let obj = new Package({});
+            obj.get().then(result => {
+                return response(res, CODES.OK, result);
             }).catch(error => {
                 return response(res, CODES.Internal_Server_Error, { error });
             });

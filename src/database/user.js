@@ -26,6 +26,7 @@ class User {
         this.carrierDocuments = carrierDocuments;
         this.favTruckUserIds = favTruckUserIds;
         this.hasOwnTruck = false;
+        this.loadLimit = 0;
         this.truck = {};
         if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference)) {
             this.hasOwnTruck = true;
@@ -34,12 +35,14 @@ class User {
             this.truck.drivingExperience = truck.drivingExperience;
             this.truck.isInsured = truck.isInsured || false;
             this.truck.travelPreference = truck.travelPreference;
+            this.truck.loadLimit = 0;
             this.favLoadIds = [];
         }
         this.createdAt = new Date().toLocaleString();
     }
 
     async save() {
+        //here we need to set the user load limit before saving
         const result = await firebaseFirestore.addData(this.collection, {
             uid: this.uid,
             packageId: this.packageId,

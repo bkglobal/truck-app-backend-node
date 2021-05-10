@@ -1,0 +1,27 @@
+{
+    "CODES":{
+        "OK": 200,
+        "Bad_Request": 400,
+        "Un_Authorize": 401,
+        "Not_Found": 404,
+        "Internal_Server_Error": 500
+    },
+    "MESSAGES":{
+        "200": "Operation Success",
+        "400": "Invalid Request",
+        "401": "UnAuthorized User",
+        "404": "Resource Not Found",
+        "500": "Internal Server Error"
+    },
+    "RESOURCE_OPERATION":{
+        "CREATED": {
+            "msg":"Resource Created Success"
+        },
+        "UPDATED": {
+            "msg":"Resource Updated Success"
+        },
+        "DELETED":{
+            "msg":"Resource Deleted Success"
+        }
+    }
+}

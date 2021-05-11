@@ -15,3 +15,5 @@ app.use('/public', express.static(path.resolve(__dirname, 'public')));
 app.get('/', (req, res) => {res.send("Welcome to SkidsterApp")});
 app.use('/api/v1/', routes);
 app.listen(PORT, ()=>console.log("http://localhost:3000/"));
+
+console.log(new Date('2021-05-12'));

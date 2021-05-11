@@ -13,7 +13,7 @@ class FreePlan {
         this.userLoadLimit = userLoadLimit;
         this.truckerLoadLimit = truckerLoadLimit;
         this.description = description;
-        this.createdAt = new Date().toLocaleString();
+        this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
 
     async save() {

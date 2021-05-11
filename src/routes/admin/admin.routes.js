@@ -1,9 +1,11 @@
 var express = require('express');
-const { isAuthenticated } = require('../../middleware/authentication');
 const adminController = require('./admin.controller');
+const userController = require('../user/user.controller');
 var router = express.Router();
 
 //Dashboard Reports
+router.get('/get-dashboard-summary-static', adminController.getDashboardSummaryStatic);
+router.get('/get-dashboard-summary-dynamic', adminController.getDashboardSummaryDynamic);
 //Free Plan
 router.post('/save-free-plan', adminController.saveFreePlan);
 router.get('/get-free-plan', adminController.getFreePlan);
@@ -16,11 +18,13 @@ router.post('/update-package', adminController.updatePackage);
 router.delete('/delete-package', adminController.deletePackage);
 //Users
 router.get('/get-all-users', adminController.getAllUsers);
-router.get('/get-user', adminController.getAllUsers);
-router.get('/update-user', adminController.getAllUsers);
-router.get('/delete-user', adminController.getAllUsers);
+router.post('/save-user', userController.signup);
+router.post('/save-carrier-document', userController.saveCarrierDocument);
+router.get('/get-user', userController.getUserDetail);
+router.post('/update-user', adminController.updateUser);
+router.get('/delete-user', adminController.deleteUser);
 //Loads
-router.get('/get-all-loads', adminController.getAllUsers);
-router.get('/get-load', adminController.getAllUsers);
+router.get('/get-all-loads', adminController.getAllLoads);
+router.get('/get-load', userController.getLoadDetail);
 
 module.exports = router;

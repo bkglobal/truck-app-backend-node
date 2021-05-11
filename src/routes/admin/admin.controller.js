@@ -2,36 +2,36 @@ const User = require("../../database/user");
 const FreePlan = require("../../database/free-plan");
 const Package = require("../../database/package");
 const Load = require("../../database/load");
-const firebaseAuthentication = require("../../services/firebase-authentication");
-const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/statusCodes.json");
-const utils = require("../../helper/utils");
-const logger = require("firebase-functions/lib/logger");
-function response(res, code, data) {
-    res.status(code);
-    res.json({ data: data, msg: MESSAGES[code] });
-    res.end();
-}
+const { parseError, response } = require("../../helper/utils");
 
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
-const Busboy = require('busboy');
+// const path = require('path');
+// const os = require('os');
+// const fs = require('fs');
+// const Busboy = require('busboy');
 
-class UserController {
+class AdminController {
     //Dashboard Reports
-    //Users
-    async getAllUsers(req, res) {
+    async getDashboardSummaryStatic(req, res) {
         try {
-            console.log("getAllUsers");
-            let user = new User({});
-            user.getAllUsers().then(userRes => {
-                return response(res, CODES.OK, userRes);
-            }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
-            });
+            console.log("getDashboardSummaryStatic");
+            let data = {};
+            data.totalUsers = (await new User({}).getAllUsers().catch(error => { throw error })).length;
+            data.completedLoads = (await new Load({}).getAllCompletedLoads().catch(error => { throw error })).length;
+            response(res, parseError('-'), data);
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
+        }
+    }
+    async getDashboardSummaryDynamic(req, res) {
+        try {
+            console.log("getDashboardSummaryDynamic");
+            const { startDate, endDate } = req.body;
+            let data = {};
+            data.newUsers = (await new User({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error })).length;
+            data.loadPosting = (await new Load({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error }));
+            response(res, parseError('-'), data);
+        } catch (error) {
+            return response(res, parseError(), {});
         }
     }
     //Free Plan
@@ -40,13 +40,12 @@ class UserController {
             console.log("saveFreePlan");
             let plan = new FreePlan(req.body);
             plan.save().then(planRes => {
-                return response(res, CODES.OK, RESOURCE_OPERATION.CREATED);
+                return response(res, parseError('-'), {});
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     async getFreePlan(req, res) {
@@ -54,13 +53,12 @@ class UserController {
             console.log("getFreePlan");
             let plan = new FreePlan({});
             plan.getPlan().then(planRes => {
-                return response(res, CODES.OK, planRes);
+                return response(res, parseError('-'), planRes);
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     async updateFreePlan(req, res) {
@@ -68,13 +66,12 @@ class UserController {
             console.log("updateFreePlan");
             let plan = new FreePlan({});
             plan.update(req.body).then(planRes => {
-                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
+                return response(res, parseError('-'), {});
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     //Packages
@@ -83,13 +80,12 @@ class UserController {
             console.log("getAllPackages");
             let obj = new Package({});
             obj.getAll().then(packageRes => {
-                return response(res, CODES.OK, packageRes);
+                return response(res, parseError('-'), packageRes);
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     async savePackage(req, res) {
@@ -97,63 +93,130 @@ class UserController {
             console.log("savePackage");
             let obj = new Package(req.body);
             obj.save().then(objRes => {
-                return response(res, CODES.OK, RESOURCE_OPERATION.CREATED);
+                return response(res, parseError('-'), objRes);
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     async getPackage(req, res) {
         try {
             console.log("getPackage");
             let { packageId } = req.query;
-            if (!packageId) return response(res, CODES.Bad_Request, { error: "packageId required" });
+            if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package({});
             obj.get(packageId).then(result => {
-                return response(res, CODES.OK, result);
+                return response(res, parseError('-'), result);
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     async updatePackage(req, res) {
         try {
             console.log("updatePackage");
             let { packageId } = req.query;
-            if (!packageId) return response(res, CODES.Bad_Request, { error: "packageId required" });
+            if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package(req.body);
             obj.update(packageId).then(result => {
-                return response(res, CODES.OK, RESOURCE_OPERATION.UPDATED);
+                return response(res, parseError('-'), {});
             }).catch(error => {
                 console.log(error);
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
         }
     }
     async deletePackage(req, res) {
         try {
             console.log("deletePackage");
             let { packageId } = req.query;
-            if (!packageId) return response(res, CODES.Bad_Request, { error: "packageId required" });
+            if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package({});
             obj.get().then(result => {
-                return response(res, CODES.OK, result);
+                return response(res, parseError('-'), result);
             }).catch(error => {
-                return response(res, CODES.Internal_Server_Error, { error });
+                return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError(), {});
+        }
+    }
+    //Users
+    async getAllUsers(req, res) {
+        try {
+            console.log("getAllUsers");
+            let user = new User({});
+            user.getAllUsers().then(userRes => {
+                return response(res, parseError('-'), userRes);
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
+        }
+    }
+    async getUser(req, res) {
+        try {
+            console.log("getUser");
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let user = new User({});
+            user.getSingleUser(userId).then((usersRes) => {
+                return response(res, parseError('-'), usersRes);
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
+        }
+    }
+    async updateUser(req, res) {
+        try {
+            console.log("updateUser");
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let user = new User({});
+            user.update(userId, req.body).then(userRes => {
+                return response(res, parseError('-'), {});
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
+        }
+    }
+    async deleteUser(req, res) {
+        try {
+            console.log("deleteUser");
+            let user = new User({});
+            user.getAllUsers().then(userRes => {
+                return response(res, parseError('-'), {});
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
+        }
+    }
+    //Loads
+    async getAllLoads(req, res) {
+        try {
+            console.log("getAllLoads");
+            let load = new Load({});
+            load.getAllLoads().then(loadRes => {
+                return response(res, parseError('-'), loadRes);
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
         }
     }
 }
-module.exports = new UserController();
+module.exports = new AdminController();

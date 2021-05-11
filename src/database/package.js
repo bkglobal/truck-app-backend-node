@@ -22,7 +22,7 @@ class Package {
             validMonthsPeriod: validMonthsPeriod,
             isDefault: isDefault
         }
-        this.createdAt = new Date().toLocaleString();
+        this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
 
     async save() {

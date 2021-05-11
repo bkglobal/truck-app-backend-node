@@ -1,8 +1,10 @@
 const admin = require('firebase-admin');
-
 const db = admin.firestore();
 
 class FirebaseFirestore {
+    getServerTimeStamp() {
+        return admin.firestore.FieldValue.serverTimestamp();
+    }
     async addData(collection, data, id) {
         return new Promise(async (resolve, reject) => {
             let ref;
@@ -12,14 +14,21 @@ class FirebaseFirestore {
                 ref = db.collection(collection).add(data);
             }
             const result = await ref.catch(reject);
-            //console.log(result);
             resolve(result);
         })
     }
     async updateData(collection, id, data) {
         return new Promise(async (resolve, reject) => {
-            const result = await db.collection(collection).doc(id).update(data).catch(reject);
-            resolve(result);
+            try {
+                await db.collection(collection).doc(id).update(data).then(result => {
+                    resolve(result);
+                }).catch((error) => {
+                    reject(error);
+                });
+            }
+            catch (error) {
+                reject(error);
+            }
         })
     }
     async getSingleData(collection, id) {
@@ -29,18 +38,22 @@ class FirebaseFirestore {
             resolve({});
         });
     }
-    async getAllData(collection) {
+    // async getAllData(collection) {
+    //     return new Promise(async (resolve, reject) => {
+    //         const result = await db.collection(collection).orderBy('createdAt').get().catch(reject);
+    //         resolve(result.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    //     });
+    // }
+    async getAllData(collection, arrWhereClauses = []) {
         return new Promise(async (resolve, reject) => {
-            const result = await db.collection(collection).get().catch(reject);
-            resolve(result.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        });
-    }
-    async getAllDataWithCriteria(collection, arrWhereClauses) {
-        return new Promise(async (resolve, reject) => {
-            let query = db.collection(collection);
-            arrWhereClauses.forEach((clause) => { query = query.where(...clause) });
-            const result = await query.get().catch(reject);
-            resolve(result.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            try{
+                let query = db.collection(collection);
+                arrWhereClauses.forEach((clause) => { query = query.where(...clause) });
+                const result = await query.get().catch(error => reject(error));
+                resolve(result.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            }catch(error){
+                reject(error);
+            }
         });
     }
 }

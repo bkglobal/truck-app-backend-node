@@ -1,5 +1,5 @@
 const firebaseFirestore = require("../services/firebase-firestore");
-
+const admin = require('firebase-admin');
 class User {
     constructor({
         uid = "",
@@ -36,9 +36,9 @@ class User {
             this.truck.isInsured = truck.isInsured || false;
             this.truck.travelPreference = truck.travelPreference;
             this.truck.loadLimit = 0;
-            this.favLoadIds = [];
+            this.truck.favLoadIds = [];
         }
-        this.createdAt = new Date().toLocaleString();
+        this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
 
     async save() {
@@ -62,23 +62,51 @@ class User {
         });
         return result;
     }
-    async update(id, data) {
-        const result = await firebaseFirestore.updateData(this.collection, id, data).catch((error) => {
-            return error;
-        });
+    async update(id, obj) {
+        let data = {};
+        if (obj.name) data.name = obj.name;
+        if (obj.companyName) data.companyName = obj.companyName;
+        if (obj.businessNumber) data.businessNumber = obj.businessNumber;
+        if (obj.address) data.address = obj.address;
+        if (obj.phoneNumber) data.phoneNumber = obj.phoneNumber;
+        if (obj.carrierDocuments) data.carrierDocuments = obj.carrierDocuments;
+        if (obj.favTruckUserIds) data.favTruckUserIds = obj.favTruckUserIds;
+        let { truck } = obj;
+        if (truck) {
+            if (truck.truckType) data["truck.truckType"] = truck.truckType;
+            if (truck.skidCapacity) data["truck.skidCapacity"] = truck.skidCapacity;
+            if (truck.drivingExperience) data["truck.drivingExperience"] = truck.drivingExperience;
+            if (truck.isInsured) data["truck.isInsured"] = truck.isInsured;
+            if (truck.travelPreference) data["truck.travelPreference"] = truck.travelPreference;
+            if (truck.favLoadIds) data["truck.favLoadIds"] = truck.favLoadIds;
+        }
+        console.log(data, id);
+        const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
         return result;
     }
     async getAllUsers() {
-        const result = await firebaseFirestore.getAllData(this.collection).catch(error => { return error });
+        const result = await firebaseFirestore.getAllData(this.collection).catch(error => { throw error });
+        return result;
+    }
+    async getAllUsersInDateRange(startDate, endDate) {
+        startDate = new Date(startDate);
+        startDate.setHours(0);
+        startDate.setMinutes(0);
+        startDate.setSeconds(0);
+        endDate = new Date(endDate);
+        endDate.setHours(0);
+        endDate.setMinutes(0);
+        endDate.setSeconds(0);
+        const result = await firebaseFirestore.getAllData(this.collection, [["createdAt",">=", startDate],["createdAt","<=", endDate]]).catch(error => { throw error });
         return result;
     }
     async getSingleUser(id) {
-        const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { return error });
+        const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         return result;
     }
     async getAllSearchUsers(address) {
-        const result = await firebaseFirestore.getAllDataWithCriteria(this.collection, [['address', '>=', address], ['address', '<=', address + '\uf8ff']]).catch(error => { return error });
-        return result.filter((doc)=> {return doc.data.hasOwnTruck == true});
+        const result = await firebaseFirestore.getAllData(this.collection, [['address', '>', address], ['address', '<=', address + '\uf8ff']]).catch(error => { throw error });
+        return result.filter((doc) => { return doc.data.hasOwnTruck == true });
     }
 }
 

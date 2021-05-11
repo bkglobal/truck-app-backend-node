@@ -1,66 +1,12 @@
 const User = require("../../database/user");
 const Load = require("../../database/load");
 const firebaseAuthentication = require("../../services/firebase-authentication");
-const { CODES, MESSAGES, RESOURCE_OPERATION } = require("../../helper/statusCodes.json");
-const utils = require("../../helper/utils");
-const logger = require("firebase-functions/lib/logger");
-// function response(res, code, data) {
-//     res.status(200);
-//     res.json({ data: data, msg: MESSAGES[code] });
-//     res.end();
-// }
-function response(res, { msg, code }, result) {
-    res.status(200);
-    res.json({ Message: msg, Code: code, Result: result });
-    res.end();
-}
-function parseError(error) {
-    console.log(error);
-    let obj;
-    switch (error) {
-        case '-':
-            obj = { code: 1, msg: "Operation Successful" };
-            break;
-        case 'auth/invalid-email':
-            obj = { code: 2, msg: "Invalid Email" };
-            break;
-        case 'auth/invalid-password':
-            obj = { code: 3, msg: "Invalid Password" };
-            break;
-        case 'auth/email-already-exists':
-            obj = { code: 4, msg: "Email Already Exist" };
-            break;
-        case 'userId':
-            obj = { code: 5, msg: "userId Required" };
-            break;
-        case 'truckUserId':
-            obj = { code: 6, msg: "truckUserId Required" };
-            break;
-        case 'file':
-            obj = { code: 7, msg: "File Required" };
-            break;
-        case 'loadId':
-            obj = { code: 8, msg: "loadId Required" };
-            break;
-        case 'address':
-            obj = { code: 9, msg: "Address Required" };
-            break;
-        case 'rating':
-            obj = { code: 10, msg: "Rating Required" };
-            break;
-        case 'shippingItem':
-            obj = { code: 11, msg: "Shipping Items Required" };
-            break;
-        default:
-            obj = { code: 0, msg: "Server Error" };
-            break;
-    }
-    return obj;
-}
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
-const Busboy = require('busboy');
+const { fileUploadPath, uploadFile, parseError, response } = require("../../helper/utils");
+
+// const path = require('path');
+// const os = require('os');
+// const fs = require('fs');
+// const Busboy = require('busboy');
 
 class UserController {
     //Registering
@@ -129,10 +75,11 @@ class UserController {
             let date = new Date();
             let fileUrls = [];
             files.forEach(file => {
-                let fileUrl = `${utils.fileUploadPath}/${date.getTime()}-${file.name}`;
+                let fileUrl = `${fileUploadPath}/${date.getTime()}-${file.name}`;
                 fileUrls.push(fileUrl)
-                utils.uploadFile(file, fileUrl).catch(() => { return response(res, parseError(), {}); });
+                uploadFile(file, fileUrl).catch(() => { return response(res, parseError(), {}); });
             });
+            console.log("hi");
             let user = new User({});
             user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
                 return response(res, parseError('-'), {});
@@ -310,10 +257,10 @@ class UserController {
     async getSearchLoads(req, res) {
         try {
             console.log("getSearchLoads");
-            let { shippingItem } = req.query;
-            if (!shippingItem) return response(res, parseError('shippingItem'), {});
+            let { skidCount } = req.query;
+            if (!skidCount) return response(res, parseError('skidCount'), {});
             let load = new Load({});
-            load.getAllSearchLoads(parseInt(shippingItem)).then((loadRes) => {
+            load.getAllSearchLoads(parseInt(skidCount)).then((loadRes) => {
                 return response(res, parseError('-'), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
@@ -432,7 +379,7 @@ class UserController {
             if (!truckUserId) return response(res, parseError('truckUserId'), {});
             if (!favLoadIds) return response(res, parseError('favLoadIds'), {});
             let user = new User({});
-            user.update(truckUserId, { "truck.favLoadIds": favLoadIds }).then((usersRes) => {
+            user.update(truckUserId, { truck: { favLoadIds: favLoadIds } }).then((usersRes) => {
                 return response(res, parseError('-'), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});

@@ -2,25 +2,17 @@ const firebaseFirestore = require("../services/firebase-firestore");
 
 class Package {
     constructor({
-        name = "",
-        description = "",
-        amount = 0,
-        validPeriodMonths = 0,
-        isDefault = false,
+        packageId = "",
+        userId = "",
+        startDate = "",
+        validPeriodMonths = 0
     }) {
         this.collection = 'Packages';
-        // this.name = name;
-        // this.description = description;
-        // this.amount = amount;
-        // this.validPeriodMonths = validPeriodMonths;
-        // this.isDefault = isDefault;
-        // this.createdAt = new Date().toLocaleString();
         this.fields = {
-            name: name,
-            description: description,
-            amount: amount,
-            validPeriodMonths: validPeriodMonths,
-            isDefault: isDefault
+            packageId: packageId,
+            userId: userId,
+            startDate: startDate,
+            validPeriodMonths: validPeriodMonths
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }

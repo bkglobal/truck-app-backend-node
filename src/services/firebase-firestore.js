@@ -38,12 +38,6 @@ class FirebaseFirestore {
             resolve({});
         });
     }
-    // async getAllData(collection) {
-    //     return new Promise(async (resolve, reject) => {
-    //         const result = await db.collection(collection).orderBy('createdAt').get().catch(reject);
-    //         resolve(result.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    //     });
-    // }
     async getAllData(collection, arrWhereClauses = []) {
         return new Promise(async (resolve, reject) => {
             try{
@@ -54,6 +48,12 @@ class FirebaseFirestore {
             }catch(error){
                 reject(error);
             }
+        });
+    }
+    async deleteDoc(collection, id) {
+        return new Promise(async (resolve, reject) => {
+            const doc = await db.collection(collection).doc(id).delete().catch(reject);
+            resolve(doc);
         });
     }
 }

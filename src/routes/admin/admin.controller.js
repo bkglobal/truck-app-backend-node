@@ -138,8 +138,8 @@ class AdminController {
             let { packageId } = req.query;
             if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package({});
-            obj.get().then(result => {
-                return response(res, parseError('-'), result);
+            obj.delete(packageId).then(result => {
+                return response(res, parseError('-'), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });

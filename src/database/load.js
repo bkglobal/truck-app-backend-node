@@ -54,14 +54,16 @@ class Load {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         return result;
     }
-    async getAllUserLoads(userId) {
-        const result = await firebaseFirestore.getAllData(this.collection, [["userId", "==", userId]]).catch(error => { throw error });
+    async getAllUserLoads(userId, hasOwnTruck, isCompleted) {
+        let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
+        if(isCompleted) clauses.push(["statusShipping", "==", "COMPLETED"]);
+        const result = await firebaseFirestore.getAllData(this.collection, clauses).catch(error => { throw error });
         return result;
     }
-    async getAllTruckerLoads(truckUserId) {
-        const result = await firebaseFirestore.getAllData(this.collection, [["truckUserId", "==", truckUserId]]).catch(error => { throw error });
-        return result;
-    }
+    // async getAllTruckerLoads(truckUserId) {
+    //     const result = await firebaseFirestore.getAllData(this.collection, [["truckUserId", "==", truckUserId]]).catch(error => { throw error });
+    //     return result;
+    // }
     async getAllSearchLoads(skidCount) {
         const result = await firebaseFirestore.getAllData(this.collection, [["skidCount", "==", skidCount]]).catch(error => { throw error });
         return result;
@@ -83,7 +85,19 @@ class Load {
         return result;
     }
     async getAllUsersInDateRange(startDate, endDate) {
-        const result = await firebaseFirestore.getAllData(this.collection, [["createdAt",">=", new Date(startDate)],["createdAt","<=", new Date(endDate)]]).catch(error => { throw error });
+        startDate = new Date(startDate);
+        startDate.setHours(0);
+        startDate.setMinutes(0);
+        startDate.setSeconds(0);
+        endDate = new Date(endDate);
+        endDate.setHours(0);
+        endDate.setMinutes(0);
+        endDate.setSeconds(0);
+        const result = await firebaseFirestore.getAllData(this.collection, [["createdAt", ">=", new Date(startDate)], ["createdAt", "<=", new Date(endDate)]]).catch(error => { throw error });
+        return result;
+    }
+    async deleteLoad(id) {
+        const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });
         return result;
     }
 }

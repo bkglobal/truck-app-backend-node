@@ -128,8 +128,10 @@ class UserController {
             console.log("getUserLoads");
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
+            let user = await (new User({}).getSingleUser(userId));
+            if(Object.keys(user).length === 0) return response(res, parseError(), {});
             let load = new Load({});
-            load.getAllUserLoads(userId).then((loadRes) => {
+            load.getAllUserLoads(userId, user.hasOwnTruck).then((loadRes) => {
                 return response(res, parseError('-'), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
@@ -146,6 +148,38 @@ class UserController {
             let load = new Load({});
             load.getLoad(loadId).then((loadRes) => {
                 return response(res, parseError('-'), loadRes);
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
+        }
+    }
+    async getCompletedUserLoads(req, res) {
+        try {
+            console.log("getCompletedUserLoads");
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let user = await (new User({}).getSingleUser(userId));
+            if(Object.keys(user).length === 0) return response(res, parseError(), {});
+            let load = new Load({});
+            load.getAllUserLoads(userId, user.hasOwnTruck, true).then((loadRes) => {
+                return response(res, parseError('-'), loadRes);
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError(), {});
+        }
+    }
+    async deleteLoad(req, res) {
+        try {
+            console.log("deleteLoad");
+            let { loadId } = req.query;
+            if (!loadId) return response(res, parseError('loadId'), {});
+            let load = new Load({});
+            load.deleteLoad(loadId).then((loadRes) => {
+                return response(res, parseError('-'), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });

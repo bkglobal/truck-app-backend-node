@@ -56,6 +56,12 @@ class Package {
         });
         return result;
     }
+    async delete(id) {
+        const result = await firebaseFirestore.deleteDoc(this.collection, id).catch((error) => {
+            return error;
+        });
+        return result;
+    }
 }
 
 module.exports = Package;

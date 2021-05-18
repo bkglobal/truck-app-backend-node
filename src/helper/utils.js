@@ -55,7 +55,7 @@ module.exports = {
                 obj = { code: 11, msg: "Skids Count Required" };
                 break;
             case 'packageId':
-                obj = { code: 11, msg: "Shipping Items Required" };
+                obj = { code: 11, msg: "packageId Required" };
                 break;
             default:
                 obj = { code: 0, msg: "Server Error" };

@@ -57,6 +57,7 @@ class Load {
     async getAllUserLoads(userId, hasOwnTruck, isCompleted) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
         if(isCompleted) clauses.push(["statusShipping", "==", "COMPLETED"]);
+        else clauses.push(["statusShipping", "!=", "COMPLETED"]);
         const result = await firebaseFirestore.getAllData(this.collection, clauses).catch(error => { throw error });
         return result;
     }

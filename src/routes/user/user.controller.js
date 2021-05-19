@@ -130,10 +130,12 @@ class UserController {
             if (!userId) return response(res, parseError('userId'), {});
             let user = await (new User({}).getSingleUser(userId));
             if(Object.keys(user).length === 0) return response(res, parseError(), {});
+            console.log(user);
             let load = new Load({});
             load.getAllUserLoads(userId, user.hasOwnTruck).then((loadRes) => {
                 return response(res, parseError('-'), loadRes);
             }).catch(error => {
+                console.log(error);
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {

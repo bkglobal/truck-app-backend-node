@@ -54,6 +54,10 @@ class Load {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         return result;
     }
+    async getMultipleLoads(ids) {
+        const result = await firebaseFirestore.getMultipleData(this.collection, ids).catch(error => { throw error });
+        return result;
+    }
     async getUserLoads(userId, { hasOwnTruck }, isCompleted) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
         if (isCompleted) clauses.push(["statusShipping", "==", "COMPLETED"]);

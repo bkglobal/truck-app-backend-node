@@ -32,6 +32,6 @@ router.get('/get-user-detail', userController.getUserDetail);//done
 router.post('/save-user-rating', userController.saveUserRating);//done
 router.get('/get-user-ratings', userController.getUserRatings);//done
 router.post('/save-fav-load', userController.saveFavLoad);//done
-router.get('/get-fav-loads', fetchUser, userController.getFavLoads);//done
+router.get('/get-fav-loads', userController.getFavLoads);//done
 
 module.exports = router;

@@ -17,9 +17,9 @@ class AdminController {
             let data = {};
             data.totalUsers = (await new User({}).getAllUsers().catch(error => { throw error })).length;
             data.completedLoads = (await new Load({}).getAllCompletedLoads().catch(error => { throw error })).length;
-            response(res, parseError('-'), data);
+            response(res, parseError(), data);
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getDashboardSummaryDynamic(req, res) {
@@ -29,9 +29,9 @@ class AdminController {
             let data = {};
             data.newUsers = (await new User({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error })).length;
             data.loadPosting = (await new Load({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error }));
-            response(res, parseError('-'), data);
+            response(res, parseError(), data);
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     //Free Plan
@@ -40,12 +40,12 @@ class AdminController {
             console.log("saveFreePlan");
             let plan = new FreePlan(req.body);
             plan.save().then(planRes => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getFreePlan(req, res) {
@@ -53,12 +53,12 @@ class AdminController {
             console.log("getFreePlan");
             let plan = new FreePlan({});
             plan.getPlan().then(planRes => {
-                return response(res, parseError('-'), planRes);
+                return response(res, parseError(), planRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async updateFreePlan(req, res) {
@@ -66,12 +66,12 @@ class AdminController {
             console.log("updateFreePlan");
             let plan = new FreePlan({});
             plan.update(req.body).then(planRes => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     //Packages
@@ -80,12 +80,12 @@ class AdminController {
             console.log("getAllPackages");
             let obj = new Package({});
             obj.getAll().then(packageRes => {
-                return response(res, parseError('-'), packageRes);
+                return response(res, parseError(), packageRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async savePackage(req, res) {
@@ -93,12 +93,12 @@ class AdminController {
             console.log("savePackage");
             let obj = new Package(req.body);
             obj.save().then(objRes => {
-                return response(res, parseError('-'), objRes);
+                return response(res, parseError(), objRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getPackage(req, res) {
@@ -108,12 +108,12 @@ class AdminController {
             if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package({});
             obj.get(packageId).then(result => {
-                return response(res, parseError('-'), result);
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async updatePackage(req, res) {
@@ -123,13 +123,13 @@ class AdminController {
             if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package(req.body);
             obj.update(packageId).then(result => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 console.log(error);
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async deletePackage(req, res) {
@@ -139,12 +139,12 @@ class AdminController {
             if (!packageId) return response(res, parseError('packageId'), {});
             let obj = new Package({});
             obj.delete(packageId).then(result => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     //Users
@@ -153,12 +153,12 @@ class AdminController {
             console.log("getAllUsers");
             let user = new User({});
             user.getAllUsers().then(userRes => {
-                return response(res, parseError('-'), userRes);
+                return response(res, parseError(), userRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getUser(req, res) {
@@ -168,12 +168,12 @@ class AdminController {
             if (!userId) return response(res, parseError('userId'), {});
             let user = new User({});
             user.getSingleUser(userId).then((usersRes) => {
-                return response(res, parseError('-'), usersRes);
+                return response(res, parseError(), usersRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async updateUser(req, res) {
@@ -183,12 +183,12 @@ class AdminController {
             if (!userId) return response(res, parseError('userId'), {});
             let user = new User({});
             user.update(userId, req.body).then(userRes => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async deleteUser(req, res) {
@@ -196,12 +196,12 @@ class AdminController {
             console.log("deleteUser");
             let user = new User({});
             user.getAllUsers().then(userRes => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     //Loads
@@ -210,12 +210,12 @@ class AdminController {
             console.log("getAllLoads");
             let load = new Load({});
             load.getAllLoads().then(loadRes => {
-                return response(res, parseError('-'), loadRes);
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
 }

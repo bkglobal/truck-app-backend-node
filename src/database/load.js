@@ -54,20 +54,16 @@ class Load {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         return result;
     }
-    async getAllUserLoads(userId, hasOwnTruck, isCompleted) {
+    async getUserLoads(userId, { hasOwnTruck }, isCompleted) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
-        if(isCompleted) clauses.push(["statusShipping", "==", "COMPLETED"]);
+        if (isCompleted) clauses.push(["statusShipping", "==", "COMPLETED"]);
         //else clauses.push(["statusShipping", "!=", "COMPLETED"]);
         let result = await firebaseFirestore.getAllData(this.collection, clauses).catch(error => { throw error });
-        if(!isCompleted) result = result.filter((doc) => doc.statusShipping != "COMPLETED");
+        if (!isCompleted) result = result.filter((doc) => doc.statusShipping != "COMPLETED");
         return result;
     }
-    // async getAllTruckerLoads(truckUserId) {
-    //     const result = await firebaseFirestore.getAllData(this.collection, [["truckUserId", "==", truckUserId]]).catch(error => { throw error });
-    //     return result;
-    // }
-    async getAllSearchLoads(skidCount) {
-        const result = await firebaseFirestore.getAllData(this.collection, [["skidCount", "==", skidCount]]).catch(error => { throw error });
+    async getSearchNewLoads() {
+        const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", "NEW"]], [["createdAt", "desc"]]).catch(error => { throw error });
         return result;
     }
     async saveTruckerRating(id, rating) {

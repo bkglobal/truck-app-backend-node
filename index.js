@@ -5,7 +5,7 @@ var routes = require('./src/routes');
 const PORT = process.env.PORT || 3000;
 var app = express();
 const fileUpload = require('express-fileupload');
-require('./src/services/firebase-init');
+//require('./src/services/firebase-init');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

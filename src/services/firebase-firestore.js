@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const db = admin.firestore();
+const db = require('./firebase-init').firestore();
 
 class FirebaseFirestore {
     getServerTimeStamp() {
@@ -34,18 +34,26 @@ class FirebaseFirestore {
     async getSingleData(collection, id) {
         return new Promise(async (resolve, reject) => {
             const doc = await db.collection(collection).doc(id).get().catch(reject);
-            if (doc.exists) resolve(doc.data());
-            resolve({});
+            resolve(doc.exists && doc.data());
         });
     }
-    async getAllData(collection, arrWhereClauses = []) {
+    async getMultipleData(collection, ids = []) {
+        const promises = [];
+        ids.forEach(id => promises.push(db.collection(collection).doc(id).get()))
         return new Promise(async (resolve, reject) => {
-            try{
+            let result = await Promise.all(promises).catch(error => reject(error));
+            resolve(result.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+    }
+    async getAllData(collection, arrWhereClauses = [], arrOrderClauses = []) {
+        return new Promise(async (resolve, reject) => {
+            try {
                 let query = db.collection(collection);
                 arrWhereClauses.forEach((clause) => { query = query.where(...clause) });
+                arrOrderClauses.forEach((clause) => { query = query.orderBy(...clause) });
                 const result = await query.get().catch(error => reject(error));
                 resolve(result.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            }catch(error){
+            } catch (error) {
                 reject(error);
             }
         });

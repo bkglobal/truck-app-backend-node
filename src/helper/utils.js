@@ -14,51 +14,61 @@ module.exports = {
     },
     response: function (res, { msg, code }, result) {
         res.status(200);
-        res.json({ Message: msg, Code: code, Result: result });
+        res.json({ Message: msg, Code: code, Result: result ? result : {} });
         res.end();
     },
     parseError: function (error) {
-        console.log(error);
+        // 0:     Server Error
+        // 1:     Operation Successful
+        // 2:     Access-Denied
+        // 5-20:  ID's Errors
+        // 21-50: Field Errors
+        if (!error) return { code: 1, msg: "Operation Successful" };
         let obj;
         switch (error) {
-            case '-':
-                obj = { code: 1, msg: "Operation Successful" };
+            case 'error':
+                obj = { code: 0, msg: "Internal Server Error" };
                 break;
-            case 'auth/invalid-email':
-                obj = { code: 2, msg: "Invalid Email" };
+            case 'access-denied':
+                obj = { code: 2, msg: "Access Denied" };
                 break;
-            case 'auth/invalid-password':
-                obj = { code: 3, msg: "Invalid Password" };
-                break;
-            case 'auth/email-already-exists':
-                obj = { code: 4, msg: "Email Already Exist" };
-                break;
+            //ID's Errors
             case 'userId':
                 obj = { code: 5, msg: "userId Required" };
                 break;
             case 'truckUserId':
                 obj = { code: 6, msg: "truckUserId Required" };
                 break;
-            case 'file':
-                obj = { code: 7, msg: "File Required" };
-                break;
             case 'loadId':
-                obj = { code: 8, msg: "loadId Required" };
-                break;
-            case 'address':
-                obj = { code: 9, msg: "Address Required" };
-                break;
-            case 'rating':
-                obj = { code: 10, msg: "Rating Required" };
-                break;
-            case 'skidCount':
-                obj = { code: 11, msg: "Skids Count Required" };
+                obj = { code: 7, msg: "loadId Required" };
                 break;
             case 'packageId':
-                obj = { code: 11, msg: "packageId Required" };
+                obj = { code: 8, msg: "packageId Required" };
+                break;
+            //Field Errors
+            case 'auth/invalid-email':
+                obj = { code: 21, msg: "Invalid Email" };
+                break;
+            case 'auth/invalid-password':
+                obj = { code: 22, msg: "Invalid Password" };
+                break;
+            case 'auth/email-already-exists':
+                obj = { code: 23, msg: "Email Already Exist" };
+                break;
+            case 'file':
+                obj = { code: 24, msg: "File Required" };
+                break;
+            case 'address':
+                obj = { code: 25, msg: "Address Required" };
+                break;
+            case 'rating':
+                obj = { code: 26, msg: "Rating Required" };
+                break;
+            case 'skidCount':
+                obj = { code: 27, msg: "Skids Count Required" };
                 break;
             default:
-                obj = { code: 0, msg: "Server Error" };
+                obj = { code: 0, msg: "Internal Server Error" };
                 break;
         }
         return obj;

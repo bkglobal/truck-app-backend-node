@@ -19,13 +19,13 @@ class UserController {
                 data["uid"] = uid;
                 let user = new User(data);
                 user.save().then(() => {
-                    return response(res, parseError('-'), { userId: uid });
+                    return response(res, parseError(), { userId: uid });
                 }).catch(error => {
                     return response(res, parseError(error.code), {});
                 });
             }).catch(error => { return response(res, parseError(error.code), {}); });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async saveCarrierDocument(req, res) {
@@ -77,17 +77,17 @@ class UserController {
             files.forEach(file => {
                 let fileUrl = `${fileUploadPath}/${date.getTime()}-${file.name}`;
                 fileUrls.push(fileUrl)
-                uploadFile(file, fileUrl).catch(() => { return response(res, parseError(), {}); });
+                uploadFile(file, fileUrl).catch(() => { return response(res, parseError('error'), {}); });
             });
             console.log("hi");
             let user = new User({});
             user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     //Premium Plans
@@ -109,18 +109,19 @@ class UserController {
     async saveUserLoad(req, res) {
         try {
             console.log("saveUserLoad");
+            if(req.user.hasOwnTruck) return response(res, parseError('access-denied'), {});
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
             let data = req.body;
             data["userId"] = userId;
             let load = new Load(data);
             load.save().then(() => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getUserLoads(req, res) {
@@ -128,18 +129,15 @@ class UserController {
             console.log("getUserLoads");
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
-            let user = await (new User({}).getSingleUser(userId));
-            if(Object.keys(user).length === 0) return response(res, parseError(), {});
-            console.log(user);
             let load = new Load({});
-            load.getAllUserLoads(userId, user.hasOwnTruck).then((loadRes) => {
-                return response(res, parseError('-'), loadRes);
+            load.getUserLoads(userId, req.user).then((loadRes) => {
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 console.log(error);
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getLoadDetail(req, res) {
@@ -149,12 +147,12 @@ class UserController {
             if (!loadId) return response(res, parseError('loadId'), {});
             let load = new Load({});
             load.getLoad(loadId).then((loadRes) => {
-                return response(res, parseError('-'), loadRes);
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getCompletedUserLoads(req, res) {
@@ -163,15 +161,15 @@ class UserController {
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
             let user = await (new User({}).getSingleUser(userId));
-            if(Object.keys(user).length === 0) return response(res, parseError(), {});
+            if(Object.keys(user).length === 0) return response(res, parseError('error'), {});
             let load = new Load({});
-            load.getAllUserLoads(userId, user.hasOwnTruck, true).then((loadRes) => {
-                return response(res, parseError('-'), loadRes);
+            load.getUserLoads(userId, user.hasOwnTruck, true).then((loadRes) => {
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async deleteLoad(req, res) {
@@ -181,44 +179,42 @@ class UserController {
             if (!loadId) return response(res, parseError('loadId'), {});
             let load = new Load({});
             load.deleteLoad(loadId).then((loadRes) => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getSearchTruckers(req, res) {
         try {
             console.log("getSearchTruckers");
-            let { address } = req.query;
-            if (!address) return response(res, parseError('address'), {});
             let user = new User({});
-            user.getAllSearchUsers(address.toLowerCase()).then((usersRes) => {
-                return response(res, parseError('-'), usersRes);
+            user.getAllTruckUsers().then((usersRes) => {
+                return response(res, parseError(), usersRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
-    async getTruckerDetail(req, res) {
-        try {
-            console.log("getTruckerDetail");
-            let { truckUserId } = req.query;
-            if (!truckUserId) return response(res, parseError('truckUserId'), {});
-            let user = new User({});
-            user.getSingleUser(truckUserId).then((usersRes) => {
-                return response(res, parseError('-'), usersRes);
-            }).catch(error => {
-                return response(res, parseError(error.code), {});
-            });
-        } catch (error) {
-            return response(res, parseError(), {});
-        }
-    }
+    // async getTruckerDetail(req, res) {
+    //     try {
+    //         console.log("getTruckerDetail");
+    //         let { truckUserId } = req.query;
+    //         if (!truckUserId) return response(res, parseError('truckUserId'), {});
+    //         let user = new User({});
+    //         user.getSingleUser(truckUserId).then((usersRes) => {
+    //             return response(res, parseError(), usersRes);
+    //         }).catch(error => {
+    //             return response(res, parseError(error.code), {});
+    //         });
+    //     } catch (error) {
+    //         return response(res, parseError('error'), {});
+    //     }
+    // }
     async saveTruckerRating(req, res) {
         try {
             console.log("saveTruckerRating");
@@ -228,12 +224,12 @@ class UserController {
             if (!rating) return response(res, parseError('rating'), {});
             let load = new Load({});
             load.saveTruckerRating(loadId, rating).then((usersRes) => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getTruckerRatings(req, res) {
@@ -249,12 +245,12 @@ class UserController {
                     userId: load.data.userId,
                     ...load.data.rating
                 }));
-                return response(res, parseError('-'), loadRes);
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async saveFavTruckerProfile(req, res) {
@@ -266,12 +262,12 @@ class UserController {
             if (!favTruckUserIds) return response(res, parseError('favTruckUserIds'), {});
             let user = new User({});
             user.update(userId, { favTruckUserIds }).then((usersRes) => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getFavTruckerProfiles(req, res) {
@@ -280,29 +276,31 @@ class UserController {
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
             let user = new User({});
-            user.getSingleUser(userId).then((usersRes) => {
-                return response(res, parseError('-'), { favTruckUserIds: usersRes.favTruckUserIds });
+            user.getMultipleUsers(req.user.favTruckUserIds).then((usersRes) => {
+                return response(res, parseError(), usersRes);
             }).catch(error => {
+                console.log(error);
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            console.log(error);
+
+            return response(res, parseError('error'), {});
         }
     }
     //Controller as Trucker
-    async getSearchLoads(req, res) {
+    async getSearchNewLoads(req, res) {
         try {
-            console.log("getSearchLoads");
-            let { skidCount } = req.query;
-            if (!skidCount) return response(res, parseError('skidCount'), {});
+            console.log("getSearchNewLoads");
             let load = new Load({});
-            load.getAllSearchLoads(parseInt(skidCount)).then((loadRes) => {
-                return response(res, parseError('-'), loadRes);
+            load.getSearchNewLoads().then((loadRes) => {
+                return response(res, parseError(), loadRes);
             }).catch(error => {
+                console.log(error);
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async saveLoadBook(req, res) {
@@ -314,12 +312,12 @@ class UserController {
             if (!truckUserId) return response(res, parseError('truckUserId'), {});
             let load = new Load({});
             load.update(loadId, { truckUserId }).then(() => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async updateLoadStatus(req, res) {
@@ -331,12 +329,12 @@ class UserController {
             if (!statusShipping) return response(res, parseError('statusShipping'), {});
             let load = new Load({});
             load.update(loadId, { statusShipping }).then(() => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getUserDetail(req, res) {
@@ -346,12 +344,12 @@ class UserController {
             if (!userId) return response(res, parseError('userId'), {});
             let user = new User({});
             user.getSingleUser(userId).then((usersRes) => {
-                return response(res, parseError('-'), usersRes);
+                return response(res, parseError(), usersRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async saveUserRating(req, res) {
@@ -363,12 +361,12 @@ class UserController {
             if (!rating) return response(res, parseError('rating'), {});
             let load = new Load({});
             load.saveUserRating(loadId, rating).then((usersRes) => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getUserRatings(req, res) {
@@ -377,19 +375,19 @@ class UserController {
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
             let load = new Load({});
-            load.getAllUserLoads(userId).then((loadRes) => {
+            load.getUserLoads(userId).then((loadRes) => {
                 loadRes = loadRes.map((load) => ({
                     loadId: load.id,
                     truckUserId: load.data.truckUserId,
                     userId: load.data.userId,
                     ...load.data.rating
                 }));
-                return response(res, parseError('-'), loadRes);
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getTruckerLoads(req, res) {
@@ -399,12 +397,12 @@ class UserController {
             if (!truckUserId) return response(res, parseError('truckUserId'), {});
             let load = new Load({});
             load.getAllTruckerLoads(truckUserId).then((loadRes) => {
-                return response(res, parseError('-'), loadRes);
+                return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async saveFavLoad(req, res) {
@@ -416,12 +414,12 @@ class UserController {
             if (!favLoadIds) return response(res, parseError('favLoadIds'), {});
             let user = new User({});
             user.update(truckUserId, { truck: { favLoadIds: favLoadIds } }).then((usersRes) => {
-                return response(res, parseError('-'), {});
+                return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
     async getFavLoads(req, res) {
@@ -430,13 +428,14 @@ class UserController {
             let { truckUserId } = req.query;
             if (!truckUserId) return response(res, parseError('truckUserId'), {});
             let user = new User({});
+            req.user = await user.getSingleUser(truckUserId);
             user.getSingleUser(truckUserId).then((usersRes) => {
-                return response(res, parseError('-'), usersRes.truck ? { favLoadIds: usersRes.truck.favLoadIds } : {});
+                return response(res, parseError(), usersRes.truck ? { favLoadIds: usersRes.truck.favLoadIds } : {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
         } catch (error) {
-            return response(res, parseError(), {});
+            return response(res, parseError('error'), {});
         }
     }
 }

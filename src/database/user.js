@@ -80,7 +80,6 @@ class User {
             if (truck.travelPreference) data["truck.travelPreference"] = truck.travelPreference;
             if (truck.favLoadIds) data["truck.favLoadIds"] = truck.favLoadIds;
         }
-        console.log(data, id);
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
         return result;
     }
@@ -97,16 +96,24 @@ class User {
         endDate.setHours(0);
         endDate.setMinutes(0);
         endDate.setSeconds(0);
-        const result = await firebaseFirestore.getAllData(this.collection, [["createdAt",">=", startDate],["createdAt","<=", endDate]]).catch(error => { throw error });
+        const result = await firebaseFirestore.getAllData(this.collection, [["createdAt", ">=", startDate], ["createdAt", "<=", endDate]]).catch(error => { throw error });
         return result;
     }
     async getSingleUser(id) {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         return result;
     }
+    async getMultipleUsers(ids) {
+        const result = await firebaseFirestore.getMultipleData(this.collection, ids).catch(error => { throw error });
+        return result;
+    }
     async getAllSearchUsers(address) {
         const result = await firebaseFirestore.getAllData(this.collection, [['address', '>', address], ['address', '<=', address + '\uf8ff']]).catch(error => { throw error });
         return result.filter((doc) => { return doc.data.hasOwnTruck == true });
+    }
+    async getAllTruckUsers() {
+        const result = await firebaseFirestore.getAllData(this.collection, [['hasOwnTruck', '==', true]]).catch(error => { throw error });
+        return result;
     }
 }
 

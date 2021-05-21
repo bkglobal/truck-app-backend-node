@@ -6,7 +6,7 @@ class Load {
         truckUserId = "",
         loadItemName = "",
         skidCount = 0,
-        weight = 0,
+        weight = "",
         pickupAddress = "",
         dropOffAddress = "",
         dateTime = "",

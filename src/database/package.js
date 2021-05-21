@@ -9,12 +9,6 @@ class Package {
         isDefault = false,
     }) {
         this.collection = 'Packages';
-        // this.name = name;
-        // this.description = description;
-        // this.amount = amount;
-        // this.validPeriodMonths = validPeriodMonths;
-        // this.isDefault = isDefault;
-        // this.createdAt = new Date().toLocaleString();
         this.fields = {
             name: name,
             description: description,

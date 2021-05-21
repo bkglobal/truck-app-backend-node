@@ -7,7 +7,7 @@ class Package {
         startDate = "",
         validPeriodMonths = 0
     }) {
-        this.collection = 'Packages';
+        this.collection = 'UserPackages';
         this.fields = {
             packageId: packageId,
             userId: userId,

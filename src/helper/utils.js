@@ -21,6 +21,7 @@ module.exports = {
         // 0:     Server Error
         // 1:     Operation Successful
         // 2:     Access-Denied
+        // 3:     Access Token
         // 5-20:  ID's Errors
         // 21-50: Field Errors
         if (!error) return { code: 1, msg: "Operation Successful" };
@@ -31,6 +32,12 @@ module.exports = {
                 break;
             case 'access-denied':
                 obj = { code: 2, msg: "Access Denied" };
+                break;
+            case 'token':
+                obj = { code: 3, msg: "Access Token Required" };
+                break;
+            case 'unauth':
+                obj = { code: 4, msg: "Unauthorize User" };
                 break;
             //ID's Errors
             case 'userId':

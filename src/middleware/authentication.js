@@ -4,11 +4,11 @@ const { parseError, response } = require("../helper/utils");
 module.exports = {
     isAuthenticated: (req, res, next) => {
         let token = req.headers.authorization || '';
-        if (!token) return res.status(403).send('Token Required!');
+        if (!token) return response(res, parseError('token'), {});
         firebaseAuthentication.isAuthenticated(token).then(() => {
             return next();
         }).catch(error => {
-            return res.status(403).send('Unauthorized');
+            return response(res, parseError('unauth'), {});
         })
     },
     fetchUser: (req, res, next) => {

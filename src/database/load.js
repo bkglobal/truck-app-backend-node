@@ -58,13 +58,18 @@ class Load {
         const result = await firebaseFirestore.getMultipleData(this.collection, ids).catch(error => { throw error });
         return result;
     }
-    async getUserLoads(userId, { hasOwnTruck }, isCompleted) {
+    async getAllUserLoads(userId, { hasOwnTruck }) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
-        if (isCompleted) clauses.push(["statusShipping", "==", "COMPLETED"]);
-        //else clauses.push(["statusShipping", "!=", "COMPLETED"]);
         let result = await firebaseFirestore.getAllData(this.collection, clauses).catch(error => { throw error });
-        if (!isCompleted) result = result.filter((doc) => doc.statusShipping != "COMPLETED");
         return result;
+    }
+    async getCompletedUserLoads(userId, { hasOwnTruck }) {
+        let result = await this.getAllUserLoads(userId, { hasOwnTruck });
+        return result.filter((record) => record.statusShipping == "COMPLETED");
+    }
+    async getInProgressUserLoads(userId, { hasOwnTruck }) {
+        let result = await this.getAllUserLoads(userId, { hasOwnTruck });
+        return result.filter((record) => (record.statusShipping != "NEW" && record.statusShipping != "COMPLETED"));
     }
     async getSearchNewLoads() {
         const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", "NEW"]], [["createdAt", "desc"]]).catch(error => { throw error });
@@ -87,14 +92,8 @@ class Load {
         return result;
     }
     async getAllUsersInDateRange(startDate, endDate) {
-        startDate = new Date(startDate);
-        startDate.setHours(0);
-        startDate.setMinutes(0);
-        startDate.setSeconds(0);
-        endDate = new Date(endDate);
-        endDate.setHours(0);
-        endDate.setMinutes(0);
-        endDate.setSeconds(0);
+        startDate = new Date(startDate); startDate.setHours(0); startDate.setMinutes(0); startDate.setSeconds(0);
+        endDate = new Date(endDate); endDate.setHours(0); endDate.setMinutes(0); endDate.setSeconds(0);
         const result = await firebaseFirestore.getAllData(this.collection, [["createdAt", ">=", new Date(startDate)], ["createdAt", "<=", new Date(endDate)]]).catch(error => { throw error });
         return result;
     }

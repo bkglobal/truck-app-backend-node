@@ -1,5 +1,5 @@
 const firebaseFirestore = require("../services/firebase-firestore");
-const admin = require('firebase-admin');
+const FieldValue = require('firebase-admin').firestore.FieldValue;
 class User {
     constructor({
         uid = "",
@@ -115,6 +115,21 @@ class User {
         const result = await firebaseFirestore.getAllData(this.collection, [['hasOwnTruck', '==', true]]).catch(error => { throw error });
         return result;
     }
+    async saveFavTruckerProfile(id, favTruckUserId) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "favTruckUserIds": FieldValue.arrayUnion(favTruckUserId) }).catch(error => { throw error });
+        return result;
+    }
+    async deleteFavTruckerProfile(id, favTruckUserId) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "favTruckUserIds": FieldValue.arrayRemove(favTruckUserId) }).catch(error => { throw error });
+        return result;
+    }
+    async saveFavLoad(id, favLoadId) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "truck.favLoadIds": FieldValue.arrayUnion(favLoadId) }).catch(error => { throw error });
+        return result;
+    }
+    async deleteFavLoad(id, favLoadId) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "truck.favLoadIds": FieldValue.arrayRemove(favLoadId) }).catch(error => { throw error });
+        return result;
+    }
 }
-
 module.exports = User;

@@ -10,7 +10,7 @@ class Load {
         weight = "",
         pickupAddress = "",
         dropOffAddress = "",
-        dateTime = "",
+        dateTime = Date.now(),
         priceRange = 0
     }) {
         this.collection = 'Loads';
@@ -22,7 +22,7 @@ class Load {
             weight: weight,
             pickupAddress: pickupAddress,
             dropOffAddress: dropOffAddress,
-            dateTime: dateTime,
+            dateTime: new Date(dateTime).toISOString(),
             priceRange: priceRange,
             statusShipping: StatusShipping.NEW,//1:NEW, 2:BOOKED, 3:DESTINATION, 4:DELIVERED, 5:COMPLETED
             rating: {
@@ -66,10 +66,25 @@ class Load {
         }
         return userLoads;
     }
-
-    async getSearchNewLoads() {
-        const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });
+    async getCompletedUserLoads(userId, { hasOwnTruck }, pageSize, docStartAfter) {
+        let clausesWhere = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId], ["statusShipping", "==", StatusShipping.COMPLETED]];
+        let clausesOrderBy = [["createdAt", "desc"]];
+        let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
+    }
+    async getInProgressUserLoads(userId, { hasOwnTruck }, pageSize, docStartAfter) {
+        let clausesWhere = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId], ["statusShipping", "!=", StatusShipping.COMPLETED]];
+        let clausesOrderBy = [["statusShipping", "desc"], ["createdAt", "desc"]];
+        let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
+        return result;
+    }
+    async getSearchNewLoads(pageSize, docStartAfter) {
+        let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
+        let clausesOrderBy = [["createdAt", "desc"]];
+        let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
+        return result;
+        // const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });
+        // return result;
     }
     async saveTruckerRating(id, rating) {
         const result = await firebaseFirestore.updateData(this.collection, id, { "rating.truckerRating": rating }).catch(error => { throw error });

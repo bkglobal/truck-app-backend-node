@@ -97,8 +97,10 @@ class User {
         const result = await firebaseFirestore.getAllData(this.collection, [['address', '>', address], ['address', '<=', address + '\uf8ff']]).catch(error => { throw error });
         return result.filter((doc) => { return doc.data.hasOwnTruck == true });
     }
-    async getAllTruckUsers() {
-        const result = await firebaseFirestore.getAllData(this.collection, [['hasOwnTruck', '==', true]]).catch(error => { throw error });
+    async getAllTruckUsers(pageSize, docStartAfter) {
+        let clausesWhere = [["hasOwnTruck", "==", true]];
+        let clausesOrderBy = [["createdAt", "desc"]];
+        let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
     async saveFavTruckerProfile(id, { favTruckUserId, isFavorite }) {

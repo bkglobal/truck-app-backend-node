@@ -4,14 +4,13 @@ class Package {
     constructor({
         packageId = "",
         userId = "",
-        startDate = "",
         validPeriodMonths = 0
     }) {
         this.collection = 'UserPackages';
         this.fields = {
             packageId: packageId,
             userId: userId,
-            startDate: startDate,
+            startDate: new Date().toISOString(),
             validPeriodMonths: validPeriodMonths
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
@@ -35,7 +34,7 @@ class Package {
     async update(id) {
         let data = {};
         for (let field in this.fields) {
-            if(this.fields[field]) data[field] = this.fields[field];
+            if (this.fields[field]) data[field] = this.fields[field];
         }
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch((error) => {
             return error;

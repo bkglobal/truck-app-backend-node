@@ -21,9 +21,9 @@ class UserController {
                 user.save().then(() => {
                     return response(res, parseError(), { userId: uid });
                 }).catch(error => {
-                    return response(res, parseError(error.code), {});
+                    return response(res, parseError(error.code || "error"), {});
                 });
-            }).catch(error => { return response(res, parseError(error.code), {}); });
+            }).catch(error => { return response(res, parseError(error.code || "error"), {}); });
         } catch (error) {
             return response(res, parseError('error'), {});
         }
@@ -84,7 +84,7 @@ class UserController {
             user.update(userId, { carrierDocuments: fileUrls }).then(userRes => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -106,6 +106,21 @@ class UserController {
         }
     }
     //Controller as User
+    async updateUser(req, res) {
+        try {
+            console.log("updateUser");
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let user = new User({});
+            user.update(userId, req.body).then(userRes => {
+                return response(res, parseError(), {});
+            }).catch(error => {
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, parseError('error'), {});
+        }
+    }
     async saveUserFcmToken(req, res) {
         try {
             console.log("saveUserFcmToken");
@@ -118,7 +133,7 @@ class UserController {
             load.save().then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -127,16 +142,17 @@ class UserController {
     async saveUserLoad(req, res) {
         try {
             console.log("saveUserLoad");
-            if (req.user.hasOwnTruck) return response(res, parseError('access-denied'), {});
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
+            let requestedUser = await (new User({}).getSingleUser(userId));
+            if (requestedUser.hasOwnTruck) return response(res, parseError('access-denied'), {});
             let data = req.body;
             data["userId"] = userId;
             let load = new Load(data);
             load.save().then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -147,12 +163,47 @@ class UserController {
             console.log("getUserLoads");
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
+            let requestedUser = await (new User({}).getSingleUser(userId));
             let load = new Load({});
-            load.getAllUserLoads(userId, req.user).then((loadRes) => {
+            load.getAllUserLoads(userId, requestedUser).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
                 console.log(error);
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, parseError('error'), {});
+        }
+    }
+    async getCompletedUserLoads(req, res) {
+        try {
+            console.log("getCompletedUserLoads");
+            let { userId, pageSize, idStartAfter } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let requestedUser = await (new User({}).getSingleUser(userId));
+            let load = new Load({});
+            load.getCompletedUserLoads(userId, requestedUser, parseInt(pageSize), idStartAfter).then((loadRes) => {
+                return response(res, parseError(), loadRes);
+            }).catch(error => {
+                console.log(error);
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, parseError('error'), {});
+        }
+    }
+    async getInProgressUserLoads(req, res) {
+        try {
+            console.log("getInProgressUserLoads");
+            let { userId, pageSize, idStartAfter } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let requestedUser = await (new User({}).getSingleUser(userId));
+            let load = new Load({});
+            load.getInProgressUserLoads(userId, requestedUser, parseInt(pageSize), idStartAfter).then((loadRes) => {
+                return response(res, parseError(), loadRes);
+            }).catch(error => {
+                console.log(error);
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -167,7 +218,7 @@ class UserController {
             load.getLoad(loadId).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -182,7 +233,7 @@ class UserController {
             load.deleteLoad(loadId).then((loadRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -191,13 +242,15 @@ class UserController {
     async getSearchTruckers(req, res) {
         try {
             console.log("getSearchTruckers");
-            let user = new User({});
-            user.getAllTruckUsers().then((usersRes) => {
+            let { pageSize, idStartAfter } = req.query;
+            new User({}).getAllTruckUsers(parseInt(pageSize), idStartAfter).then((usersRes) => {
                 return response(res, parseError(), usersRes);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                console.log(error);
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
+            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -210,7 +263,7 @@ class UserController {
     //         user.getSingleUser(truckUserId).then((usersRes) => {
     //             return response(res, parseError(), usersRes);
     //         }).catch(error => {
-    //             return response(res, parseError(error.code), {});
+    //             return response(res, parseError(error.code || "error"), {});
     //         });
     //     } catch (error) {
     //         return response(res, parseError('error'), {});
@@ -227,7 +280,7 @@ class UserController {
             load.saveTruckerRating(loadId, rating).then((usersRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -248,7 +301,7 @@ class UserController {
                 }));
                 return response(res, parseError(), loadRes);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -264,7 +317,7 @@ class UserController {
             new User({}).saveFavTruckerProfile(userId, { favTruckUserId, isFavorite }).then((usersRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -275,12 +328,13 @@ class UserController {
             console.log("getFavTruckerProfiles");
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
+            let requestedUser = await (new User({}).getSingleUser(userId));
             let user = new User({});
-            user.getMultipleUsers(req.user.favTruckUserIds).then((usersRes) => {
+            user.getMultipleUsers(requestedUser.favTruckUserIds).then((usersRes) => {
                 return response(res, parseError(), usersRes);
             }).catch(error => {
                 console.log(error);
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             console.log(error);
@@ -292,14 +346,14 @@ class UserController {
     async getSearchNewLoads(req, res) {
         try {
             console.log("getSearchNewLoads");
-            let load = new Load({});
-            load.getSearchNewLoads().then((loadRes) => {
+            let { pageSize, idStartAfter } = req.query;
+            new Load({}).getSearchNewLoads(parseInt(pageSize), idStartAfter).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
-                console.log(error);
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || 'error'), {});
             });
         } catch (error) {
+            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -314,7 +368,7 @@ class UserController {
             load.update(loadId, { truckUserId }).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -331,7 +385,7 @@ class UserController {
             load.update(loadId, { statusShipping }).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -346,7 +400,7 @@ class UserController {
             user.getSingleUser(userId).then((usersRes) => {
                 return response(res, parseError(), usersRes);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -363,7 +417,7 @@ class UserController {
             load.saveUserRating(loadId, rating).then((usersRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -376,7 +430,7 @@ class UserController {
             if (!userId) return response(res, parseError('userId'), {});
             let user = await (new User({}).getSingleUser(userId));
             if (!user) return response(res, parseError('error'), {});
-            new Load({}).getAllUserLoads(userId, user).then(({completed}) => {
+            new Load({}).getAllUserLoads(userId, user).then(({ completed }) => {
                 completed = completed.map((load) => ({
                     loadId: load.id,
                     truckUserId: load.truckUserId,
@@ -385,7 +439,7 @@ class UserController {
                 }));
                 return response(res, parseError(), completed);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             console.log(error);
@@ -401,7 +455,7 @@ class UserController {
             load.getAllTruckerLoads(truckUserId).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -417,7 +471,7 @@ class UserController {
             new User({}).saveFavLoad(truckUserId, { favLoadId, isFavorite }).then((usersRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -435,7 +489,7 @@ class UserController {
             load.getMultipleLoads(req.user.truck.favLoadIds).then((usersRes) => {
                 return response(res, parseError(), usersRes);
             }).catch(error => {
-                return response(res, parseError(error.code), {});
+                return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
             return response(res, parseError('error'), {});

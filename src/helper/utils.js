@@ -24,7 +24,7 @@ module.exports = {
         // 3:     Access Token
         // 5-20:  ID's Errors
         // 21-50: Field Errors
-        if (!error) return { code: 1, msg: "Operation Successful" };
+        if (error === undefined) return { code: 1, msg: "Operation Successful" };
         let obj;
         switch (error) {
             case 'error':

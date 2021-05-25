@@ -15,50 +15,41 @@ class User {
         truck = null
     }) {
         this.collection = 'Users';
-        this.uid = uid;
-        this.packageId = packageId;
-        this.name = name;
-        this.email = email;
-        this.companyName = companyName;
-        this.businessNumber = businessNumber;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.carrierDocuments = carrierDocuments;
-        this.favTruckUserIds = favTruckUserIds;
-        this.hasOwnTruck = false;
-        this.loadLimit = 0;
-        this.truck = {};
+        this.fields = {
+            uid: uid,
+            packageId: packageId,
+            name: name,
+            email: email,
+            companyName: companyName,
+            businessNumber: businessNumber,
+            address: address.toLowerCase(),
+            phoneNumber: phoneNumber,
+            carrierDocuments: carrierDocuments,
+            favTruckUserIds: favTruckUserIds,
+            hasOwnTruck: false,
+            loadLimit: 0,
+            truck: {},
+            fcmToken: ""
+        }
         if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference)) {
-            this.hasOwnTruck = true;
-            this.truck.truckType = truck.truckType;
-            this.truck.skidCapacity = truck.skidCapacity;
-            this.truck.drivingExperience = truck.drivingExperience;
-            this.truck.isInsured = truck.isInsured || false;
-            this.truck.travelPreference = truck.travelPreference;
-            this.truck.loadLimit = 0;
-            this.truck.favLoadIds = [];
+            this.fields.hasOwnTruck = true;
+            this.fields.truck.truckType = truck.truckType;
+            this.fields.truck.skidCapacity = truck.skidCapacity;
+            this.fields.truck.drivingExperience = truck.drivingExperience;
+            this.fields.truck.isInsured = truck.isInsured || false;
+            this.fields.truck.travelPreference = truck.travelPreference;
+            this.fields.truck.loadLimit = 0;
+            this.fields.truck.favLoadIds = [];
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
-
     async save() {
         //here we need to set the user load limit before saving
         const result = await firebaseFirestore.addData(this.collection, {
-            uid: this.uid,
-            packageId: this.packageId,
-            name: this.name,
-            email: this.email,
-            companyName: this.companyName,
-            businessNumber: this.businessNumber,
-            address: this.address.toLowerCase(),
-            phoneNumber: this.phoneNumber,
-            carrierDocuments: this.carrierDocuments,
-            favTruckUserIds: this.favTruckUserIds,
-            hasOwnTruck: this.hasOwnTruck,
-            truck: this.truck,
+            ...this.fields,
             createdAt: this.createdAt
-        }, this.uid).catch((error) => {
-            return error;
+        }, this.fields.uid).catch((error) => {
+            throw error;
         });
         return result;
     }
@@ -71,6 +62,7 @@ class User {
         if (obj.phoneNumber) data.phoneNumber = obj.phoneNumber;
         if (obj.carrierDocuments) data.carrierDocuments = obj.carrierDocuments;
         if (obj.favTruckUserIds) data.favTruckUserIds = obj.favTruckUserIds;
+        if (obj.fcmToken) data.fcmToken = obj.fcmToken;
         let { truck } = obj;
         if (truck) {
             if (truck.truckType) data["truck.truckType"] = truck.truckType;
@@ -88,14 +80,8 @@ class User {
         return result;
     }
     async getAllUsersInDateRange(startDate, endDate) {
-        startDate = new Date(startDate);
-        startDate.setHours(0);
-        startDate.setMinutes(0);
-        startDate.setSeconds(0);
-        endDate = new Date(endDate);
-        endDate.setHours(0);
-        endDate.setMinutes(0);
-        endDate.setSeconds(0);
+        startDate = new Date(startDate); startDate.setHours(0); startDate.setMinutes(0); startDate.setSeconds(0);
+        endDate = new Date(endDate); endDate.setHours(0); endDate.setMinutes(0); endDate.setSeconds(0);
         const result = await firebaseFirestore.getAllData(this.collection, [["createdAt", ">=", startDate], ["createdAt", "<=", endDate]]).catch(error => { throw error });
         return result;
     }
@@ -115,20 +101,12 @@ class User {
         const result = await firebaseFirestore.getAllData(this.collection, [['hasOwnTruck', '==', true]]).catch(error => { throw error });
         return result;
     }
-    async saveFavTruckerProfile(id, favTruckUserId) {
-        const result = await firebaseFirestore.updateData(this.collection, id, { "favTruckUserIds": FieldValue.arrayUnion(favTruckUserId) }).catch(error => { throw error });
+    async saveFavTruckerProfile(id, { favTruckUserId, isFavorite }) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "favTruckUserIds": isFavorite ? FieldValue.arrayUnion(favTruckUserId) : FieldValue.arrayRemove(favTruckUserId) }).catch(error => { throw error });
         return result;
     }
-    async deleteFavTruckerProfile(id, favTruckUserId) {
-        const result = await firebaseFirestore.updateData(this.collection, id, { "favTruckUserIds": FieldValue.arrayRemove(favTruckUserId) }).catch(error => { throw error });
-        return result;
-    }
-    async saveFavLoad(id, favLoadId) {
-        const result = await firebaseFirestore.updateData(this.collection, id, { "truck.favLoadIds": FieldValue.arrayUnion(favLoadId) }).catch(error => { throw error });
-        return result;
-    }
-    async deleteFavLoad(id, favLoadId) {
-        const result = await firebaseFirestore.updateData(this.collection, id, { "truck.favLoadIds": FieldValue.arrayRemove(favLoadId) }).catch(error => { throw error });
+    async saveFavLoad(id, { favLoadId, isFavorite }) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "truck.favLoadIds": isFavorite ? FieldValue.arrayUnion(favLoadId) : FieldValue.arrayRemove(favLoadId) }).catch(error => { throw error });
         return result;
     }
 }

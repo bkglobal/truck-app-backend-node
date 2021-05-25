@@ -106,6 +106,24 @@ class UserController {
         }
     }
     //Controller as User
+    async saveUserFcmToken(req, res) {
+        try {
+            console.log("saveUserFcmToken");
+            if (req.user.hasOwnTruck) return response(res, parseError('access-denied'), {});
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            let data = req.body;
+            data["userId"] = userId;
+            let load = new Load(data);
+            load.save().then(() => {
+                return response(res, parseError(), {});
+            }).catch(error => {
+                return response(res, parseError(error.code), {});
+            });
+        } catch (error) {
+            return response(res, parseError('error'), {});
+        }
+    }
     async saveUserLoad(req, res) {
         try {
             console.log("saveUserLoad");
@@ -147,39 +165,6 @@ class UserController {
             if (!loadId) return response(res, parseError('loadId'), {});
             let load = new Load({});
             load.getLoad(loadId).then((loadRes) => {
-                return response(res, parseError(), loadRes);
-            }).catch(error => {
-                return response(res, parseError(error.code), {});
-            });
-        } catch (error) {
-            return response(res, parseError('error'), {});
-        }
-    }
-    async getCompletedUserLoads(req, res) {
-        try {
-            console.log("getCompletedUserLoads");
-            let { userId } = req.query;
-            if (!userId) return response(res, parseError('userId'), {});
-            let user = await (new User({}).getSingleUser(userId));
-            if (!user) return response(res, parseError('error'), {});
-            let load = new Load({});
-            load.getCompletedUserLoads(userId, user.hasOwnTruck).then((loadRes) => {
-                return response(res, parseError(), loadRes);
-            }).catch(error => {
-                return response(res, parseError(error.code), {});
-            });
-        } catch (error) {
-            return response(res, parseError('error'), {});
-        }
-    }
-    async getInProgressUserLoads(req, res) {
-        try {
-            console.log("getInProgressUserLoads");
-            let { userId } = req.query;
-            if (!userId) return response(res, parseError('userId'), {});
-            let user = await (new User({}).getSingleUser(userId));
-            if (!user) return response(res, parseError('error'), {});
-            new Load({}).getInProgressUserLoads(userId, user.hasOwnTruck, true).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
@@ -274,25 +259,9 @@ class UserController {
             console.log("saveFavTruckerProfile");
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
-            let { favTruckUserId } = req.body;
+            let { favTruckUserId, isFavorite } = req.body;
             if (!favTruckUserId) return response(res, parseError('favTruckUserId'), {});
-            new User({}).saveFavTruckerProfile(userId, favTruckUserId).then((usersRes) => {
-                return response(res, parseError(), {});
-            }).catch(error => {
-                return response(res, parseError(error.code), {});
-            });
-        } catch (error) {
-            return response(res, parseError('error'), {});
-        }
-    }
-    async deleteFavTruckerProfile(req, res) {
-        try {
-            console.log("deleteFavTruckerProfile");
-            let { userId } = req.query;
-            if (!userId) return response(res, parseError('userId'), {});
-            let { favTruckUserId } = req.body;
-            if (!favTruckUserId) return response(res, parseError('favTruckUserId'), {});
-            new User({}).deleteFavTruckerProfile(userId, favTruckUserId).then((usersRes) => {
+            new User({}).saveFavTruckerProfile(userId, { favTruckUserId, isFavorite }).then((usersRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});
@@ -407,14 +376,14 @@ class UserController {
             if (!userId) return response(res, parseError('userId'), {});
             let user = await (new User({}).getSingleUser(userId));
             if (!user) return response(res, parseError('error'), {});
-            new Load({}).getCompletedUserLoads(userId, user).then((loadRes) => {
-                loadRes = loadRes.map((load) => ({
+            new Load({}).getAllUserLoads(userId, user).then(({completed}) => {
+                completed = completed.map((load) => ({
                     loadId: load.id,
                     truckUserId: load.truckUserId,
                     userId: load.userId,
                     ...load.rating
                 }));
-                return response(res, parseError(), loadRes);
+                return response(res, parseError(), completed);
             }).catch(error => {
                 return response(res, parseError(error.code), {});
             });
@@ -442,26 +411,10 @@ class UserController {
         try {
             console.log("saveFavLoad");
             let { truckUserId } = req.query;
-            let { favLoadId } = req.body;
+            let { favLoadId, isFavorite } = req.body;
             if (!truckUserId) return response(res, parseError('truckUserId'), {});
             if (!favLoadId) return response(res, parseError('favLoadId'), {});
-            new User({}).saveFavLoad(truckUserId, favLoadId).then((usersRes) => {
-                return response(res, parseError(), {});
-            }).catch(error => {
-                return response(res, parseError(error.code), {});
-            });
-        } catch (error) {
-            return response(res, parseError('error'), {});
-        }
-    }
-    async deleteFavLoad(req, res) {
-        try {
-            console.log("deleteFavLoad");
-            let { truckUserId } = req.query;
-            let { favLoadId } = req.body;
-            if (!truckUserId) return response(res, parseError('truckUserId'), {});
-            if (!favLoadId) return response(res, parseError('favLoadId'), {});
-            new User({}).deleteFavLoad(truckUserId, favLoadId).then((usersRes) => {
+            new User({}).saveFavLoad(truckUserId, { favLoadId, isFavorite }).then((usersRes) => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code), {});

@@ -1,4 +1,5 @@
 const firebaseFirestore = require("../services/firebase-firestore");
+const { StatusShipping } = require('../helper/constants');
 
 class Load {
     constructor({
@@ -10,38 +11,30 @@ class Load {
         pickupAddress = "",
         dropOffAddress = "",
         dateTime = "",
-        priceRange = 0,
-        statusShipping = "NEW"
+        priceRange = 0
     }) {
         this.collection = 'Loads';
-        this.userId = userId;
-        this.truckUserId = truckUserId;
-        this.loadItemName = loadItemName;
-        this.skidCount = skidCount;
-        this.weight = weight;
-        this.pickupAddress = pickupAddress;
-        this.dropOffAddress = dropOffAddress;
-        this.dateTime = dateTime;
-        this.priceRange = priceRange;
-        this.statusShipping = statusShipping;//NEW/BOOKED/DESTINATION/DELIVERED/COMPLETED
+        this.fields = {
+            userId: userId,
+            truckUserId: truckUserId,
+            loadItemName: loadItemName,
+            skidCount: skidCount,
+            weight: weight,
+            pickupAddress: pickupAddress,
+            dropOffAddress: dropOffAddress,
+            dateTime: dateTime,
+            priceRange: priceRange,
+            statusShipping: StatusShipping.NEW,//1:NEW, 2:BOOKED, 3:DESTINATION, 4:DELIVERED, 5:COMPLETED
+            rating: {
+                truckerRating: 0,
+                userRating: 0
+            }
+        }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
     async save() {
         const result = await firebaseFirestore.addData(this.collection, {
-            userId: this.userId,
-            truckUserId: this.truckUserId,
-            loadItemName: this.loadItemName,
-            skidCount: this.skidCount,
-            weight: this.weight,
-            pickupAddress: this.pickupAddress,
-            dropOffAddress: this.dropOffAddress,
-            dateTime: this.dateTime,
-            priceRange: this.priceRange,
-            statusShipping: this.statusShipping,
-            rating: {
-                truckerRating: 0,
-                userRating: 0
-            },
+            ...this.fields,
             createdAt: this.createdAt
         }).catch(error => { throw error });
         return result;
@@ -61,18 +54,21 @@ class Load {
     async getAllUserLoads(userId, { hasOwnTruck }) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
         let result = await firebaseFirestore.getAllData(this.collection, clauses).catch(error => { throw error });
-        return result;
+        let userLoads = {
+            new: [],
+            completed: [],
+            inprogress: []
+        }
+        for (let load of result) {
+            if (load.statusShipping == StatusShipping.NEW) userLoads.new.push(load);
+            else if (load.statusShipping == StatusShipping.COMPLETED) userLoads.completed.push(load);
+            else userLoads.inprogress.push(load);
+        }
+        return userLoads;
     }
-    async getCompletedUserLoads(userId, { hasOwnTruck }) {
-        let result = await this.getAllUserLoads(userId, { hasOwnTruck });
-        return result.filter((record) => record.statusShipping == "COMPLETED");
-    }
-    async getInProgressUserLoads(userId, { hasOwnTruck }) {
-        let result = await this.getAllUserLoads(userId, { hasOwnTruck });
-        return result.filter((record) => (record.statusShipping != "NEW" && record.statusShipping != "COMPLETED"));
-    }
+
     async getSearchNewLoads() {
-        const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", "NEW"]], [["createdAt", "desc"]]).catch(error => { throw error });
+        const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });
         return result;
     }
     async saveTruckerRating(id, rating) {
@@ -88,7 +84,7 @@ class Load {
         return result;
     }
     async getAllCompletedLoads() {
-        const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", "COMPLETED"]]).catch(error => { throw error });
+        const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 5]]).catch(error => { throw error });
         return result;
     }
     async getAllUsersInDateRange(startDate, endDate) {

@@ -91,7 +91,7 @@ class User {
     }
     async getMultipleUsers(ids) {
         const result = await firebaseFirestore.getMultipleData(this.collection, ids).catch(error => { throw error });
-        return result;
+        return result.map((data) => ({...data, isFavorite: true}));
     }
     async getAllSearchUsers(address) {
         const result = await firebaseFirestore.getAllData(this.collection, [['address', '>', address], ['address', '<=', address + '\uf8ff']]).catch(error => { throw error });

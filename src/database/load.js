@@ -49,7 +49,7 @@ class Load {
     }
     async getMultipleLoads(ids) {
         const result = await firebaseFirestore.getMultipleData(this.collection, ids).catch(error => { throw error });
-        return result;
+        return result.map((data) => ({...data, isFavorite: true}));
     }
     async getAllUserLoads(userId, { hasOwnTruck }) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
@@ -78,11 +78,11 @@ class Load {
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
-    async getSearchNewLoads({truck}, pageSize, docStartAfter) {
+    async getSearchNewLoads(pageSize, docStartAfter) {
         let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
-        return result.map((data) => ({ ...data, isFavorite: truck.favLoadIds.indexOf(data.id) > -1 }));
+        return result;
         
         //return result;
         // const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });

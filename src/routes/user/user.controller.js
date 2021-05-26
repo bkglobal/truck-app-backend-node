@@ -348,11 +348,8 @@ class UserController {
     async getSearchNewLoads(req, res) {
         try {
             console.log("getSearchNewLoads");
-            let { userId, pageSize, idStartAfter } = req.query;
-            if (!userId) return response(res, parseError('userId'), {});
-            let requestedUser = await (new User({}).getSingleUser(userId));
-            //if(!requestedUser.hasOwnTruck)
-            new Load({}).getSearchNewLoads(requestedUser, parseInt(pageSize), idStartAfter).then((loadRes) => {
+            let { pageSize, idStartAfter } = req.query;
+            new Load({}).getSearchNewLoads(parseInt(pageSize), idStartAfter).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
                 console.log(error);

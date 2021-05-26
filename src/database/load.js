@@ -78,11 +78,13 @@ class Load {
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
-    async getSearchNewLoads(pageSize, docStartAfter) {
+    async getSearchNewLoads({truck}, pageSize, docStartAfter) {
         let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
-        return result;
+        return result.map((data) => ({ ...data, isFavorite: truck.favLoadIds.indexOf(data.id) > -1 }));
+        
+        //return result;
         // const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });
         // return result;
     }

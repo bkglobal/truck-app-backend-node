@@ -22,6 +22,7 @@ module.exports = {
         // 1:     Operation Successful
         // 2:     Access-Denied
         // 3:     Access Token
+        // 4:     Unauthorize User
         // 5-20:  ID's Errors
         // 21-50: Field Errors
         if (error === undefined) return { code: 1, msg: "Operation Successful" };

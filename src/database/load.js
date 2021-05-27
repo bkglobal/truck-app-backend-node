@@ -44,10 +44,11 @@ class Load {
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
         return result;
     }
-    async getLoad(id) {
+    async getLoad(id, {truck}) {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         let postedUser = await new User({}).getSingleUser(result.userId);
         result["postedBy"] = { name: postedUser.name, id: postedUser.uid };
+        result["isFavorite"] = truck.favLoadIds ? (truck.favLoadIds.indexOf(id) > -1) : false;
         return result;
     }
     async getMultipleLoads(ids) {
@@ -122,9 +123,15 @@ class Load {
         return result;
     }
     async getUserLoadSummary(userId) {
+        const user = await new User({}).getSingleUser(userId);
         const posted = await firebaseFirestore.getAllDataLength(this.collection, [["userId", "==", userId]]).catch(error => { throw error });
         const completed = await firebaseFirestore.getAllDataLength(this.collection, [["userId", "==", userId], ["statusShipping", "==", StatusShipping.COMPLETED]]).catch(error => { throw error });
-        return { posted, completed };
+        return { posted, completed, user:{
+            name: user["name"],
+            address: user["address"],
+            companyName: user["companyName"],
+            businessNumber: user["businessNumber"]
+        } };
     }
     async deleteLoad(id) {
         const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });

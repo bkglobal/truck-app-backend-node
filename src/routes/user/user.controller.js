@@ -212,15 +212,20 @@ class UserController {
     async getLoadDetail(req, res) {
         try {
             console.log("getLoadDetail");
-            let { loadId } = req.query;
+            let { loadId, userId } = req.query;
             if (!loadId) return response(res, parseError('loadId'), {});
+            if (!userId) return response(res, parseError('userId'), {});
+            let requestedUser = await (new User({}).getSingleUser(userId));
+            if (!requestedUser) return response(res, parseError('unauth'), {});
             let load = new Load({});
-            load.getLoad(loadId).then((loadRes) => {
+            load.getLoad(loadId, requestedUser).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
+                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
+            console.log(error);
             return response(res, parseError('error'), {});
         }
     }

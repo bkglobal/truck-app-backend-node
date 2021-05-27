@@ -75,14 +75,18 @@ class User {
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
         return result;
     }
-    async getAllUsers() {
+    async getAll() {
         const result = await firebaseFirestore.getAllData(this.collection).catch(error => { throw error });
+        return result;
+    }
+    async getAllLength() {
+        const result = await firebaseFirestore.getAllDataLength(this.collection).catch(error => { throw error });
         return result;
     }
     async getAllUsersInDateRange(startDate, endDate) {
         startDate = new Date(startDate); startDate.setHours(0); startDate.setMinutes(0); startDate.setSeconds(0);
         endDate = new Date(endDate); endDate.setHours(0); endDate.setMinutes(0); endDate.setSeconds(0);
-        const result = await firebaseFirestore.getAllData(this.collection, [["createdAt", ">=", startDate], ["createdAt", "<=", endDate]]).catch(error => { throw error });
+        const result = await firebaseFirestore.getAllDataLength(this.collection, [["createdAt", ">=", startDate], ["createdAt", "<=", endDate]]).catch(error => { throw error });
         return result;
     }
     async getSingleUser(id) {

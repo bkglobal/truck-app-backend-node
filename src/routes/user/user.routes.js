@@ -19,6 +19,7 @@ router.get('/get-user-loads', userController.getUserLoads);//done
 router.get('/get-completed-user-loads', userController.getCompletedUserLoads);//done
 router.get('/get-inprogress-user-loads', userController.getInProgressUserLoads);//done
 router.get('/get-load-detail', userController.getLoadDetail);//done
+router.get('/get-user-load-summary', userController.getUserLoadSummary);//done
 router.delete('/delete-load', userController.deleteLoad);//done
 router.get('/get-search-truckers', userController.getSearchTruckers);//done
 //router.get('/get-trucker-detail', userController.getTruckerDetail);//done

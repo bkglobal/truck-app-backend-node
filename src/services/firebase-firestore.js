@@ -58,6 +58,19 @@ class FirebaseFirestore {
             }
         });
     }
+    async getAllDataLength(collection, arrWhereClauses = [], arrOrderClauses = []) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let query = db.collection(collection);
+                arrWhereClauses.forEach((clause) => { query = query.where(...clause) });
+                arrOrderClauses.forEach((clause) => { query = query.orderBy(...clause) });
+                const result = await query.get().catch(error => reject(error));
+                resolve(result.docs.length);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
     async getPaginatedData(collection, arrWhereClauses = [], arrOrderClauses = [], pageSize, docIdStartAfter) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -75,7 +88,6 @@ class FirebaseFirestore {
             }
         });
     }
-
     async deleteDoc(collection, id) {
         return new Promise(async (resolve, reject) => {
             const doc = await db.collection(collection).doc(id).delete().catch(reject);

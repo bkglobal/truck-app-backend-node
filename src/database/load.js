@@ -1,5 +1,6 @@
 const firebaseFirestore = require("../services/firebase-firestore");
 const { StatusShipping } = require('../helper/constants');
+const User = require("./user");
 
 class Load {
     constructor({
@@ -45,11 +46,13 @@ class Load {
     }
     async getLoad(id) {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
+        let postedUser = await new User({}).getSingleUser(result.userId);
+        result["postedBy"] = { name: postedUser.name, id: postedUser.uid };
         return result;
     }
     async getMultipleLoads(ids) {
         const result = await firebaseFirestore.getMultipleData(this.collection, ids).catch(error => { throw error });
-        return result.map((data) => ({...data, isFavorite: true}));
+        return result.map((data) => ({ ...data, isFavorite: true }));
     }
     async getAllUserLoads(userId, { hasOwnTruck }) {
         let clauses = [[hasOwnTruck ? "truckUserId" : "userId", "==", userId]];
@@ -83,7 +86,7 @@ class Load {
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
-        
+
         //return result;
         // const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });
         // return result;
@@ -96,12 +99,20 @@ class Load {
         const result = await firebaseFirestore.updateData(this.collection, id, { "rating.userRating": rating }).catch(error => { throw error });
         return result;
     }
-    async getAllLoads() {
+    async getAll() {
         const result = await firebaseFirestore.getAllData(this.collection).catch(error => { throw error });
+        return result;
+    }
+    async getAllLength() {
+        const result = await firebaseFirestore.getAllDataLength(this.collection).catch(error => { throw error });
         return result;
     }
     async getAllCompletedLoads() {
         const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 5]]).catch(error => { throw error });
+        return result;
+    }
+    async getAllCompletedLoadsLength() {
+        const result = await firebaseFirestore.getAllDataLength(this.collection, [["statusShipping", "==", 5]]).catch(error => { throw error });
         return result;
     }
     async getAllUsersInDateRange(startDate, endDate) {
@@ -109,6 +120,11 @@ class Load {
         endDate = new Date(endDate); endDate.setHours(0); endDate.setMinutes(0); endDate.setSeconds(0);
         const result = await firebaseFirestore.getAllData(this.collection, [["createdAt", ">=", new Date(startDate)], ["createdAt", "<=", new Date(endDate)]]).catch(error => { throw error });
         return result;
+    }
+    async getUserLoadSummary(userId) {
+        const posted = await firebaseFirestore.getAllDataLength(this.collection, [["userId", "==", userId]]).catch(error => { throw error });
+        const completed = await firebaseFirestore.getAllDataLength(this.collection, [["userId", "==", userId], ["statusShipping", "==", StatusShipping.COMPLETED]]).catch(error => { throw error });
+        return { posted, completed };
     }
     async deleteLoad(id) {
         const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });

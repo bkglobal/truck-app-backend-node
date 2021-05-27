@@ -15,8 +15,8 @@ class AdminController {
         try {
             console.log("getDashboardSummaryStatic");
             let data = {};
-            data.totalUsers = (await new User({}).getAllUsers().catch(error => { throw error })).length;
-            data.completedLoads = (await new Load({}).getAllCompletedLoads().catch(error => { throw error })).length;
+            data.totalUsers = (await new User({}).getAllLength().catch(error => { throw error }));
+            data.completedLoads = (await new Load({}).getAllCompletedLoadsLength().catch(error => { throw error }));
             response(res, parseError(), data);
         } catch (error) {
             return response(res, parseError('error'), {});
@@ -27,7 +27,7 @@ class AdminController {
             console.log("getDashboardSummaryDynamic");
             const { startDate, endDate } = req.body;
             let data = {};
-            data.newUsers = (await new User({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error })).length;
+            data.newUsers = (await new User({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error }));
             data.loadPosting = (await new Load({}).getAllUsersInDateRange(startDate, endDate).catch(error => { throw error }));
             response(res, parseError(), data);
         } catch (error) {
@@ -152,7 +152,7 @@ class AdminController {
         try {
             console.log("getAllUsers");
             let user = new User({});
-            user.getAllUsers().then(userRes => {
+            user.getAll().then(userRes => {
                 return response(res, parseError(), userRes);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -180,7 +180,7 @@ class AdminController {
         try {
             console.log("deleteUser");
             let user = new User({});
-            user.getAllUsers().then(userRes => {
+            user.getAll().then(userRes => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -194,7 +194,7 @@ class AdminController {
         try {
             console.log("getAllLoads");
             let load = new Load({});
-            load.getAllLoads().then(loadRes => {
+            load.getAll().then(loadRes => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});

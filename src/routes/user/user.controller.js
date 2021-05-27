@@ -224,6 +224,20 @@ class UserController {
             return response(res, parseError('error'), {});
         }
     }
+    async getUserLoadSummary(req, res) {
+        try {
+            console.log("getUserLoadSummary");
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            new Load({}).getUserLoadSummary(userId).then((loadRes) => {
+                return response(res, parseError(), loadRes);
+            }).catch(error => {
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, parseError('error'), {});
+        }
+    }
     async deleteLoad(req, res) {
         try {
             console.log("deleteLoad");

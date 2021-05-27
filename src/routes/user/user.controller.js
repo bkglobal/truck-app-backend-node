@@ -240,6 +240,7 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
+            console.log(error);
             return response(res, parseError('error'), {});
         }
     }

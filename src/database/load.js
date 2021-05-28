@@ -7,22 +7,30 @@ class Load {
         userId = "",
         truckUserId = "",
         loadItemName = "",
-        skidCount = 0,
+        skidCount = "",
         weight = "",
-        pickupAddress = "",
-        dropOffAddress = "",
+        pickupAddress = {},
+        dropOffAddress = {},
         dateTime = Date.now(),
-        priceRange = 0
+        priceRange = ""
     }) {
         this.collection = 'Loads';
         this.fields = {
             userId: userId,
             truckUserId: truckUserId,
-            loadItemName: loadItemName,
+            loadItemName: loadItemName.toLowerCase(),
             skidCount: skidCount,
             weight: weight,
-            pickupAddress: pickupAddress,
-            dropOffAddress: dropOffAddress,
+            pickupAddress: {
+                address: "",
+                city: "",
+                country: ""
+            },
+            dropOffAddress: {
+                address: "",
+                city: "",
+                country: ""
+            },
             dateTime: new Date(dateTime).toISOString(),
             priceRange: priceRange,
             statusShipping: StatusShipping.NEW,//1:NEW, 2:BOOKED, 3:DESTINATION, 4:DELIVERED, 5:COMPLETED
@@ -32,6 +40,16 @@ class Load {
             }
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
+        if (pickupAddress && (pickupAddress.address && pickupAddress.city && pickupAddress.country)) {
+            this.fields.pickupAddress.address = pickupAddress.address;
+            this.fields.pickupAddress.city = pickupAddress.city;
+            this.fields.pickupAddress.country = pickupAddress.country;
+        }
+        if (dropOffAddress && (dropOffAddress.address && dropOffAddress.city && dropOffAddress.country)) {
+            this.fields.dropOffAddress.address = dropOffAddress.address;
+            this.fields.dropOffAddress.city = dropOffAddress.city;
+            this.fields.dropOffAddress.country = dropOffAddress.country;
+        }
     }
     async save() {
         const result = await firebaseFirestore.addData(this.collection, {
@@ -44,7 +62,7 @@ class Load {
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
         return result;
     }
-    async getLoad(id, {truck}) {
+    async getLoad(id, { truck }) {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         let postedUser = await new User({}).getSingleUser(result.userId);
         result["postedBy"] = { name: postedUser.name, id: postedUser.uid };
@@ -87,10 +105,12 @@ class Load {
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
-
-        //return result;
-        // const result = await firebaseFirestore.getAllData(this.collection, [["statusShipping", "==", 1]], [["createdAt", "desc"]]).catch(error => { throw error });
-        // return result;
+    }
+    async getSearchNewLoadsByName(pageSize, docStartAfter, filter = {}) {
+        let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
+        if(filter.loadItemName) {clausesWhere.push(["loadItemName", ">=", filter.loadItemName]);clausesWhere.push(["loadItemName", "<=", filter.loadItemName+'\uf8ff']);}
+        let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, undefined, pageSize, docStartAfter).catch(error => { throw error });
+        return result;
     }
     async saveTruckerRating(id, rating) {
         const result = await firebaseFirestore.updateData(this.collection, id, { "rating.truckerRating": rating }).catch(error => { throw error });
@@ -126,12 +146,14 @@ class Load {
         const user = await new User({}).getSingleUser(userId);
         const posted = await firebaseFirestore.getAllDataLength(this.collection, [["userId", "==", userId]]).catch(error => { throw error });
         const completed = await firebaseFirestore.getAllDataLength(this.collection, [["userId", "==", userId], ["statusShipping", "==", StatusShipping.COMPLETED]]).catch(error => { throw error });
-        return { posted, completed, user:{
-            name: user["name"],
-            address: user["address"],
-            companyName: user["companyName"],
-            businessNumber: user["businessNumber"]
-        } };
+        return {
+            posted, completed, user: {
+                name: user["name"],
+                address: user["address"],
+                companyName: user["companyName"],
+                businessNumber: user["businessNumber"]
+            }
+        };
     }
     async deleteLoad(id) {
         const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });

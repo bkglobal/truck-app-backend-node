@@ -6,12 +6,65 @@ const { StatusShipping } = require('../helper/constants');
 
 router.use('/user', userRoute);
 router.use('/admin', adminRoute);
-router.use('/help', (req, res) =>{
+router.use('/help', (req, res) => {
     res.json([
         {
+            Model: "User",
+            Schema: {
+                uid: "String: user id by firebase",
+                name: "String: name of user",
+                email: "String: email of user",
+                companyName: "String: company name of user",
+                businessNumber: "String: business number of user",
+                phoneNumber: "String: phone number of user",
+                carrierDocuments: "Array-String: image urls of user documents",
+                favTruckUserIds: "Array-String: uid of other users",
+                hasOwnTruck: "Boolean: determine the user is trucker or load poster",
+                loadLimit: "Number: load posting limit for load poster",
+                address: {
+                    address: "String: street address of user",
+                    city: "String: city name of user",
+                    country: "String: country name of user"
+                },
+                fcmToken: "String: firebase device registration token",
+                truck: {
+                    truckType: "String: type of truck",
+                    skidCapacity: "String: no of skids capacity of truck",
+                    drivingExperience: "String: total driving experience of truck user",
+                    isInsured: "Boolean: determine that truck is insured or not",
+                    travelPreference: "String: area of truck service coverage",
+                    loadLimit: "Number: load booking limit of truck user",
+                    favLoadIds: "Array-String: ids of loads"
+                },
+                createdAt: "firebase_timestamp: time at which user is created"
+            }
+        },
+        {
             Model: "Load",
-            Description: {
-                "key-statusShipping": StatusShipping
+            Schema: {
+                userId: "String: uid of user who posted this load",
+                truckUserId: "String: uid of truck user who books this load",
+                loadItemName: "String: name of load",
+                skidCount: "String: skids count of this load",
+                weight: "String: weight of load",
+                pickupAddress: {
+                    address: "String: street address of load pickup location",
+                    city: "String: city name of load to pick",
+                    country: "String: country name of load to pick"
+                },
+                dropOffAddress: {
+                    address: "String: street address of load drop location",
+                    city: "String: city name of load to drop",
+                    country: "String: country name of load to drop"
+                },
+                dateTime: "String: date/time ISO format string",
+                priceRange: "String: price range of load by load poster",
+                statusShipping: "Number: 1:NEW, 2:BOOKED, 3:DESTINATION, 4:DELIVERED, 5:COMPLETED",
+                rating: {
+                    truckerRating: "Number: rating for truck by load poster",
+                    userRating: "Number: rating for user by truck loader"
+                },
+                createdAt: "firebase_timestamp: time at which load is created"
             }
         }
     ]);

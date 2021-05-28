@@ -9,8 +9,8 @@ class Load {
         loadItemName = "",
         skidCount = "",
         weight = "",
-        pickupAddress = {},
-        dropOffAddress = {},
+        pickupAddress = "",
+        dropOffAddress = "",
         dateTime = Date.now(),
         priceRange = ""
     }) {
@@ -21,16 +21,18 @@ class Load {
             loadItemName: loadItemName.toLowerCase(),
             skidCount: skidCount,
             weight: weight,
-            pickupAddress: {
-                address: "",
-                city: "",
-                country: ""
-            },
-            dropOffAddress: {
-                address: "",
-                city: "",
-                country: ""
-            },
+            pickupAddress: pickupAddress,
+            dropOffAddress: dropOffAddress,
+            // pickupAddress: {
+            //     address: "",
+            //     city: "",
+            //     country: ""
+            // },
+            // dropOffAddress: {
+            //     address: "",
+            //     city: "",
+            //     country: ""
+            // },
             dateTime: new Date(dateTime).toISOString(),
             priceRange: priceRange,
             statusShipping: StatusShipping.NEW,//1:NEW, 2:BOOKED, 3:DESTINATION, 4:DELIVERED, 5:COMPLETED
@@ -40,16 +42,16 @@ class Load {
             }
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
-        if (pickupAddress && (pickupAddress.address && pickupAddress.city && pickupAddress.country)) {
-            this.fields.pickupAddress.address = pickupAddress.address;
-            this.fields.pickupAddress.city = pickupAddress.city;
-            this.fields.pickupAddress.country = pickupAddress.country;
-        }
-        if (dropOffAddress && (dropOffAddress.address && dropOffAddress.city && dropOffAddress.country)) {
-            this.fields.dropOffAddress.address = dropOffAddress.address;
-            this.fields.dropOffAddress.city = dropOffAddress.city;
-            this.fields.dropOffAddress.country = dropOffAddress.country;
-        }
+        // if (pickupAddress && (pickupAddress.address && pickupAddress.city && pickupAddress.country)) {
+        //     this.fields.pickupAddress.address = pickupAddress.address;
+        //     this.fields.pickupAddress.city = pickupAddress.city;
+        //     this.fields.pickupAddress.country = pickupAddress.country;
+        // }
+        // if (dropOffAddress && (dropOffAddress.address && dropOffAddress.city && dropOffAddress.country)) {
+        //     this.fields.dropOffAddress.address = dropOffAddress.address;
+        //     this.fields.dropOffAddress.city = dropOffAddress.city;
+        //     this.fields.dropOffAddress.country = dropOffAddress.country;
+        // }
     }
     async save() {
         const result = await firebaseFirestore.addData(this.collection, {

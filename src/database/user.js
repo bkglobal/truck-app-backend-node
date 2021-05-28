@@ -10,7 +10,8 @@ class User {
         companyName = "",
         businessNumber = "",
         phoneNumber = "",
-        address = {},
+        address = "",
+        // address = {},
         carrierDocuments = [],
         favTruckUserIds = [],
         truck = null
@@ -28,21 +29,22 @@ class User {
             favTruckUserIds: favTruckUserIds,
             hasOwnTruck: false,
             loadLimit: 0,
-            address: {
-                address: "",
-                city: "",
-                country: ""
-            },
+            // address: {
+            //     address: "",
+            //     city: "",
+            //     country: ""
+            // },
+            address: address,
             truck: {},
             fcmToken: ""
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
 
-        if (address && (address.address && address.city && address.country)) {
-            this.fields.address.address = address.address;
-            this.fields.address.city = address.city;
-            this.fields.address.country = address.country;
-        }
+        // if (address && (address.address && address.city && address.country)) {
+        //     this.fields.address.address = address.address;
+        //     this.fields.address.city = address.city;
+        //     this.fields.address.country = address.country;
+        // }
         if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference)) {
             this.fields.hasOwnTruck = true;
             this.fields.truck.truckType = truck.truckType;
@@ -73,13 +75,14 @@ class User {
         if (obj.carrierDocuments) data.carrierDocuments = obj.carrierDocuments;
         if (obj.favTruckUserIds) data.favTruckUserIds = obj.favTruckUserIds;
         if (obj.fcmToken) data.fcmToken = obj.fcmToken;
+        if (obj.address) data.address = obj.address;
 
-        let { address } = obj;
-        if (address) {
-            if (address.address) data["address.address"] = address.address;
-            if (address.city) data["address.city"] = address.city;
-            if (address.country) data["address.country"] = address.country;
-        }
+        // let { address } = obj;
+        // if (address) {
+        //     if (address.address) data["address.address"] = address.address;
+        //     if (address.city) data["address.city"] = address.city;
+        //     if (address.country) data["address.country"] = address.country;
+        // }
         let { truck } = obj;
         if (truck) {
             if (truck.truckType) data["truck.truckType"] = truck.truckType;

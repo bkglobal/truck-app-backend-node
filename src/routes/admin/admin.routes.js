@@ -16,6 +16,11 @@ router.post('/save-package', adminController.savePackage);
 router.get('/get-package', adminController.getPackage);
 router.post('/update-package', adminController.updatePackage);
 router.delete('/delete-package', adminController.deletePackage);
+//Queries
+router.get('/get-users-queries', userController.getUsersQueries);
+router.get('/get-query', userController.getQuery);
+router.post('/update-user-query-reply', userController.updateUserQueryReply);
+router.delete('/delete-query', userController.deleteQuery);
 //Users
 router.get('/get-all-users', adminController.getAllUsers);
 router.post('/save-user', userController.signup);
@@ -26,5 +31,6 @@ router.get('/delete-user', adminController.deleteUser);
 //Loads
 router.get('/get-all-loads', adminController.getAllLoads);
 router.get('/get-load', userController.getLoadDetail);
+router.delete('/delete-load', userController.deleteLoad);
 
 module.exports = router;

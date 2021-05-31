@@ -66,6 +66,18 @@ router.use('/help', (req, res) => {
                 },
                 createdAt: "firebase_timestamp: time at which load is created"
             }
+        },
+        {
+            Model: "Query",
+            Schema: {
+                userId: "String: uid of user who posted this query",
+                queryBy: "String: name of user",
+                title: "String: title of query discussion",
+                query: "String: actual query question of user",
+                queryReply: "String: query answer by support team",
+                status: "Number: 1:PENDING, 2:RESOLVED",
+                createdAt: "firebase_timestamp: time at which query is created"
+            }
         }
     ]);
 });

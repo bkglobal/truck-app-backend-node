@@ -1,5 +1,6 @@
 const User = require("../../database/user");
 const Load = require("../../database/load");
+const Query = require("../../database/query");
 const firebaseAuthentication = require("../../services/firebase-authentication");
 const { fileUploadPath, uploadFile, parseError, response } = require("../../helper/utils");
 
@@ -117,6 +118,91 @@ class UserController {
         try {
             console.log("getPremiumPlans");
         } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    //Queries
+    async saveUserQuery(req, res) {
+        try {
+            console.log("saveUserQuery");
+            new Query(req.body).save().then(() => {
+                return response(res, parseError(), {});
+            }).catch(error => {
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getUserQueries(req, res) {
+        try {
+            console.log("getUserQueries");
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            new Query({}).getAllUserQueries(userId).then((result) => {
+                return response(res, parseError(), result);
+            }).catch(error => {
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getQuery(req, res) {
+        try {
+            console.log("getQuery");
+            let { queryId } = req.query;
+            if (!queryId) return response(res, parseError('userId'), {});
+            new Query({}).get(queryId).then((result) => {
+                return response(res, parseError(), result);
+            }).catch(error => {
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async deleteQuery(req, res) {
+        try {
+            console.log("deleteQuery");
+            let { queryId } = req.query;
+            if (!queryId) return response(res, parseError('userId'), {});
+            new Query({}).delete(queryId).then(() => {
+                return response(res, parseError(), {});
+            }).catch(error => {
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async getUsersQueries(req, res) {
+        try {
+            console.log("getUsersQueries");
+            new Query({}).getAllUsersQueries().then((result) => {
+                return response(res, parseError(), result);
+            }).catch(error => {
+                console.log(error);
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            console.log(error);
+            return response(res, CODES.Bad_Request, { error });
+        }
+    }
+    async updateUserQueryReply(req, res) {
+        try {
+            console.log("updateUserQueryReply");
+            let { queryId } = req.query;
+            if (!queryId) return response(res, parseError('queryId'), {});
+            new Query({}).updateUserQueryReply(queryId, req.body).then(() => {
+                return response(res, parseError(), {});
+            }).catch(error => {
+                console.log(error);
+                return response(res, parseError(error.code || "error"), {});
+            });
+        } catch (error) {
+            console.log(error);
             return response(res, CODES.Bad_Request, { error });
         }
     }
@@ -393,7 +479,7 @@ class UserController {
         try {
             console.log("getSearchNewLoads");
             let { pageSize, idStartAfter } = req.query;
-            new Load({}).getSearchNewLoads(parseInt(pageSize), idStartAfter).then((loadRes) => {
+            new Load({}).getSearchNewLoads(parseInt(pageSize), idStartAfter, req.body).then((loadRes) => {
                 return response(res, parseError(), loadRes);
             }).catch(error => {
                 console.log(error);

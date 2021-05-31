@@ -102,8 +102,10 @@ class Load {
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
-    async getSearchNewLoads(pageSize, docStartAfter) {
+    async getSearchNewLoads(pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
+        if(filter.skidCount) clausesWhere.push(["skidCount", "==", filter.skidCount]);
+        if(filter.weight) clausesWhere.push(["weight", "==", filter.weight]);
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;

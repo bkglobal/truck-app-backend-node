@@ -12,6 +12,11 @@ router.post('/notification', userController.sendNotification);//done
 //Premium Plans
 router.post('/save-premium-plan', userController.savePremiumPlan);
 router.get('/get-premium-plans', userController.getPremiumPlans);
+//Queries
+router.post('/save-user-query', userController.saveUserQuery);
+router.get('/get-user-queries', userController.getUserQueries);
+router.get('/get-query', userController.getQuery);
+router.delete('/delete-query', userController.deleteQuery);
 //Routes as User
 router.get('/test', isAuthenticated, userController.getUserDetail);//done
 router.post('/save-user-fcm-token', userController.updateUser);//done
@@ -30,7 +35,7 @@ router.get('/get-trucker-rating s', userController.getTruckerRatings);//done
 router.post('/save-fav-trucker-profile', userController.saveFavTruckerProfile);//done
 router.get('/get-fav-trucker-profiles', userController.getFavTruckerProfiles);//done
 //Routes as Trucker
-router.get('/get-search-new-loads', userController.getSearchNewLoads);//done
+router.post('/get-search-new-loads', userController.getSearchNewLoads);//done
 router.post('/get-search-new-loads-by-name', userController.getSearchNewLoadsByName);//done
 router.post('/save-load-book', userController.saveLoadBook);//done
 router.post('/update-load-status', userController.updateLoadStatus);//done

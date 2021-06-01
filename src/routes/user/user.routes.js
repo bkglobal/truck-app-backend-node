@@ -31,7 +31,7 @@ router.delete('/delete-load', userController.deleteLoad);//done
 router.post('/get-search-truckers', userController.getSearchTruckers);//done
 router.post('/get-search-truckers-by-name', userController.getSearchTruckersByName);//done
 router.post('/save-trucker-rating', userController.saveTruckerRating);//done
-router.get('/get-trucker-rating s', userController.getTruckerRatings);//done
+router.get('/get-trucker-ratings', userController.getTruckerRatings);//done
 router.post('/save-fav-trucker-profile', userController.saveFavTruckerProfile);//done
 router.get('/get-fav-trucker-profiles', userController.getFavTruckerProfiles);//done
 //Routes as Trucker

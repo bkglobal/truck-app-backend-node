@@ -627,7 +627,7 @@ class UserController {
             let { truckUserId } = req.query;
             if (!truckUserId) return response(res, parseError('truckUserId'), {});
             let user = await (new User({}).getSingleUser(truckUserId));
-            if (!req.user.hasOwnTruck) return response(res, parseError('access-denied'), {});
+            if (!user.hasOwnTruck) return response(res, parseError('access-denied'), {});
             new Load({}).getMultipleLoads(user.truck.favLoadIds).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {

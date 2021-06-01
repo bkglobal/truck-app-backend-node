@@ -68,10 +68,27 @@ router.use('/help', (req, res) => {
             }
         },
         {
+            Model: "FreePlan",
+            Schema: {
+                name: "String: general name of free plan",
+                description: "String: description of this plan",
+                userLoadLimit: "Number: limit of load posting for poster",
+                truckerLoadLimi: "Number: limit of load booking for trucker"
+            }
+        },
+        {
+            Model: "Package",
+            Schema: {
+                name: "String: general name of free plan",
+                description: "String: description of this plan",
+                amount: "Number: price of this premium package",
+                validPeriodMonths: "Number: number of months for this premium package"
+            }
+        },
+        {
             Model: "Query",
             Schema: {
                 userId: "String: uid of user who posted this query",
-                queryBy: "String: name of user",
                 title: "String: title of query discussion",
                 query: "String: actual query question of user",
                 queryReply: "String: query answer by support team",

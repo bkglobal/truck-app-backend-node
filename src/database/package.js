@@ -5,16 +5,14 @@ class Package {
         name = "",
         description = "",
         amount = 0,
-        validPeriodMonths = 0,
-        isDefault = false,
+        validPeriodMonths = 0
     }) {
         this.collection = 'Packages';
         this.fields = {
             name: name,
             description: description,
             amount: amount,
-            validPeriodMonths: validPeriodMonths,
-            isDefault: isDefault
+            validPeriodMonths: validPeriodMonths
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
@@ -34,11 +32,12 @@ class Package {
         });
         return result;
     }
-    async update(id) {
+    async update(id, obj) {
         let data = {};
-        for (let field in this.fields) {
-            if(this.fields[field]) data[field] = this.fields[field];
-        }
+        if (obj.name) data.name = obj.name;
+        if (obj.description) data.description = obj.description;
+        if (obj.amount) data.amount = obj.amount;
+        if (obj.validPeriodMonths) data.validPeriodMonths = obj.validPeriodMonths;
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch((error) => {
             return error;
         });

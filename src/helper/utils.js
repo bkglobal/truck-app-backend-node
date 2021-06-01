@@ -75,6 +75,9 @@ module.exports = {
             case 'skidCount':
                 obj = { code: 27, msg: "Skids Count Required" };
                 break;
+            case 'load-limit-reached':
+                obj = { code: 27, msg: "Load Limit Reached" };
+                break;
             default:
                 obj = { code: 0, msg: "Internal Server Error" };
                 break;

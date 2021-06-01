@@ -38,8 +38,7 @@ class AdminController {
     async saveFreePlan(req, res) {
         try {
             console.log("saveFreePlan");
-            let plan = new FreePlan(req.body);
-            plan.save().then(planRes => {
+            new FreePlan(req.body).save().then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -51,9 +50,8 @@ class AdminController {
     async getFreePlan(req, res) {
         try {
             console.log("getFreePlan");
-            let plan = new FreePlan({});
-            plan.getPlan().then(planRes => {
-                return response(res, parseError(), planRes);
+            new FreePlan({}).getPlan().then(result => {
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
             });
@@ -64,8 +62,7 @@ class AdminController {
     async updateFreePlan(req, res) {
         try {
             console.log("updateFreePlan");
-            let plan = new FreePlan({});
-            plan.update(req.body).then(planRes => {
+            new FreePlan({}).update(req.body).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -78,9 +75,8 @@ class AdminController {
     async getAllPackages(req, res) {
         try {
             console.log("getAllPackages");
-            let obj = new Package({});
-            obj.getAll().then(packageRes => {
-                return response(res, parseError(), packageRes);
+            new Package({}).getAll().then(result => {
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
             });
@@ -91,9 +87,8 @@ class AdminController {
     async savePackage(req, res) {
         try {
             console.log("savePackage");
-            let obj = new Package(req.body);
-            obj.save().then(objRes => {
-                return response(res, parseError(), objRes);
+            new Package(req.body).save().then(result => {
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
             });
@@ -106,8 +101,7 @@ class AdminController {
             console.log("getPackage");
             let { packageId } = req.query;
             if (!packageId) return response(res, parseError('packageId'), {});
-            let obj = new Package({});
-            obj.get(packageId).then(result => {
+            new Package({}).get(packageId).then(result => {
                 return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -121,8 +115,7 @@ class AdminController {
             console.log("updatePackage");
             let { packageId } = req.query;
             if (!packageId) return response(res, parseError('packageId'), {});
-            let obj = new Package(req.body);
-            obj.update(packageId).then(result => {
+            new Package({}).update(packageId, req.body).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 console.log(error);
@@ -137,8 +130,7 @@ class AdminController {
             console.log("deletePackage");
             let { packageId } = req.query;
             if (!packageId) return response(res, parseError('packageId'), {});
-            let obj = new Package({});
-            obj.delete(packageId).then(result => {
+            new Package({}).delete(packageId).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -151,9 +143,8 @@ class AdminController {
     async getAllUsers(req, res) {
         try {
             console.log("getAllUsers");
-            let user = new User({});
-            user.getAll().then(userRes => {
-                return response(res, parseError(), userRes);
+            new User({}).getAll().then(result => {
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
             });
@@ -166,9 +157,8 @@ class AdminController {
             console.log("getUser");
             let { userId } = req.query;
             if (!userId) return response(res, parseError('userId'), {});
-            let user = new User({});
-            user.getSingleUser(userId).then((usersRes) => {
-                return response(res, parseError(), usersRes);
+            new User({}).getSingleUser(userId).then((result) => {
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
             });
@@ -179,8 +169,7 @@ class AdminController {
     async deleteUser(req, res) {
         try {
             console.log("deleteUser");
-            let user = new User({});
-            user.getAll().then(userRes => {
+            new User({}).getAll().then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
@@ -193,9 +182,8 @@ class AdminController {
     async getAllLoads(req, res) {
         try {
             console.log("getAllLoads");
-            let load = new Load({});
-            load.getAll().then(loadRes => {
-                return response(res, parseError(), loadRes);
+            new Load({}).getAll().then(result => {
+                return response(res, parseError(), result);
             }).catch(error => {
                 return response(res, parseError(error.code || "error"), {});
             });

@@ -15,7 +15,6 @@ class FreePlan {
         this.description = description;
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
-
     async save() {
         const result = await firebaseFirestore.addData(this.collection, {
             name: this.name,

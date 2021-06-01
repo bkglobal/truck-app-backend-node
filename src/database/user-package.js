@@ -11,11 +11,11 @@ class Package {
             packageId: packageId,
             userId: userId,
             startDate: new Date().toISOString(),
-            validPeriodMonths: validPeriodMonths
+            validPeriodMonths: validPeriodMonths,
+            status: 1//1:PENDING, 2:ACTIVE, 3:EXPIRED
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }
-
     async save() {
         const result = await firebaseFirestore.addData(this.collection, {
             ...this.fields,
@@ -31,11 +31,9 @@ class Package {
         });
         return result;
     }
-    async update(id) {
+    async update(id, obj) {
         let data = {};
-        for (let field in this.fields) {
-            if (this.fields[field]) data[field] = this.fields[field];
-        }
+        if (obj.status) data.status = obj.status;
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch((error) => {
             return error;
         });

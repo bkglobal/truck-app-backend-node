@@ -12,6 +12,7 @@ class User {
         phoneNumber = "",
         address = "",
         // address = {},
+        loadLimit = 0,
         carrierDocuments = [],
         favTruckUserIds = [],
         truck = null
@@ -28,7 +29,7 @@ class User {
             carrierDocuments: carrierDocuments,
             favTruckUserIds: favTruckUserIds,
             hasOwnTruck: false,
-            loadLimit: 0,
+            loadLimit: loadLimit,
             // address: {
             //     address: "",
             //     city: "",
@@ -45,19 +46,19 @@ class User {
         //     this.fields.address.city = address.city;
         //     this.fields.address.country = address.country;
         // }
-        if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference)) {
+        if (truck && (truck.truckType && truck.skidCapacity && truck.drivingExperience && truck.travelPreference && truck.loadLimit)) {
             this.fields.hasOwnTruck = true;
             this.fields.truck.truckType = truck.truckType;
             this.fields.truck.skidCapacity = truck.skidCapacity;
             this.fields.truck.drivingExperience = truck.drivingExperience;
             this.fields.truck.isInsured = truck.isInsured || false;
             this.fields.truck.travelPreference = truck.travelPreference;
-            this.fields.truck.loadLimit = 0;
+            this.fields.truck.loadLimit = truck.loadLimit;
             this.fields.truck.favLoadIds = [];
         }
     }
     async save() {
-        //here we need to set the user load limit before saving
+        //saving user data to firestore
         const result = await firebaseFirestore.addData(this.collection, {
             ...this.fields,
             createdAt: this.createdAt
@@ -123,15 +124,15 @@ class User {
     }
     async getAllTruckUsers(requestedUser, pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["hasOwnTruck", "==", true]];
-        if(filter.truckType) clausesWhere.push(["truck.truckType", "==", filter.truckType]);
-        if(filter.skidCapacity) clausesWhere.push(["truck.skidCapacity", "==", filter.skidCapacity]);
+        if (filter.truckType) clausesWhere.push(["truck.truckType", "==", filter.truckType]);
+        if (filter.skidCapacity) clausesWhere.push(["truck.skidCapacity", "==", filter.skidCapacity]);
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result.map((data) => ({ ...data, isFavorite: requestedUser.favTruckUserIds.indexOf(data.id) > -1 }));
     }
     async getAllTruckUsersByName(requestedUser, pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["hasOwnTruck", "==", true]];
-        if(filter.truckerName) {clausesWhere.push(["name", ">=", filter.truckerName]);clausesWhere.push(["name", "<=", filter.truckerName+'\uf8ff']);}
+        if (filter.truckerName) { clausesWhere.push(["name", ">=", filter.truckerName]); clausesWhere.push(["name", "<=", filter.truckerName + '\uf8ff']); }
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, undefined, pageSize, docStartAfter).catch(error => { throw error });
         return result.map((data) => ({ ...data, isFavorite: requestedUser.favTruckUserIds.indexOf(data.id) > -1 }));
     }
@@ -145,6 +146,14 @@ class User {
     }
     async sendNotification(token, title, body) {
         const result = await firebaseMessaging.sendDeviceNotification(token, title, body).catch(error => { throw error });
+        return result;
+    }
+    async decrementLoadLimit(id) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "loadLimit": FieldValue.increment(-1) }).catch(error => { throw error });
+        return result;
+    }
+    async decrementLoadLimitTrucker(id) {
+        const result = await firebaseFirestore.updateData(this.collection, id, { "truck.loadLimit": FieldValue.increment(-1) }).catch(error => { throw error });
         return result;
     }
 }

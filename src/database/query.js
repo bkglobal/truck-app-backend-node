@@ -4,17 +4,15 @@ class Query {
     constructor({
         userId = "",
         title = "",
-        query = "",
-        queryReply = "",
-        status = 1
+        query = ""
     }) {
         this.collection = 'Queries';
         this.fields = {
             userId: userId,
             title: title,
             query: query,
-            queryReply: queryReply,
-            status: status
+            queryReply: "",
+            status: StatusQuery.PENDING
         }
         this.createdAt = firebaseFirestore.getServerTimeStamp();
     }

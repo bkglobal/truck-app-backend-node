@@ -2,6 +2,7 @@ const User = require("../../database/user");
 const FreePlan = require("../../database/free-plan");
 const Package = require("../../database/package");
 const Load = require("../../database/load");
+const firebaseAuthentication = require("../../services/firebase-authentication");
 const { parseError, response } = require("../../helper/utils");
 
 // const path = require('path');
@@ -169,11 +170,15 @@ class AdminController {
     async deleteUser(req, res) {
         try {
             console.log("deleteUser");
-            new User({}).getAll().then(() => {
-                return response(res, parseError(), {});
-            }).catch(error => {
-                return response(res, parseError(error.code || "error"), {});
-            });
+            let { userId } = req.query;
+            if (!userId) return response(res, parseError('userId'), {});
+            firebaseAuthentication.deleteUser(userId).then(() => {
+                new User({}).delete(userId).then(() => {
+                    return response(res, parseError(), {});
+                }).catch(error => {
+                    return response(res, parseError(error.code || "error"), {});
+                });
+            }).catch(error => { console.log(error); return response(res, parseError(error.code || "error"), {}); });
         } catch (error) {
             return response(res, parseError('error'), {});
         }

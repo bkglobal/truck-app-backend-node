@@ -27,7 +27,7 @@ router.post('/save-user', userController.signup);
 router.post('/save-carrier-document', userController.saveCarrierDocument);
 router.get('/get-user', userController.getUserDetail);
 router.post('/update-user', userController.updateUser);
-router.get('/delete-user', adminController.deleteUser);
+router.delete('/delete-user', adminController.deleteUser);
 //Loads
 router.get('/get-all-loads', adminController.getAllLoads);
 router.get('/get-load', userController.getLoadDetail);

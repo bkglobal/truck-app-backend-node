@@ -156,5 +156,9 @@ class User {
         const result = await firebaseFirestore.updateData(this.collection, id, { "truck.loadLimit": FieldValue.increment(-1) }).catch(error => { throw error });
         return result;
     }
+    async delete(id) {
+        const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });
+        return result;
+    }
 }
 module.exports = User;

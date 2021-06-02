@@ -1,5 +1,8 @@
 const firebaseFirestore = require("../services/firebase-firestore");
-const { StatusQuery } = require("../helper/constants");
+const StatusQuery = {
+    "PENDING": 1,
+    "RESOLVED": 2
+};
 class Query {
     constructor({
         userId = "",
@@ -29,7 +32,7 @@ class Query {
         return result;
     }
     async getAllUserQueries(userId) {
-        const result = await firebaseFirestore.getAllData(this.collection, [["userId", "==", userId]], [["createdAt", "desc"]]).catch((error) => { throw error; });
+        const result = await firebaseFirestore.getAllData(this.collection, [["userId", "==", userId]], [["createdAt", "asc"]]).catch((error) => { throw error; });
         return result;
     }
     async getAllUsersQueries() {

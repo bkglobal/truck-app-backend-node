@@ -1,7 +1,12 @@
 const firebaseFirestore = require("../services/firebase-firestore");
-const { StatusShipping } = require('../helper/constants');
 const User = require("./user");
-
+const StatusShipping = {
+    "NEW": 1,
+    "BOOKED": 2,
+    "DESTINATION": 3,
+    "DELIVERED": 4,
+    "COMPLETED": 5
+};
 class Load {
     constructor({
         userId = "",
@@ -60,8 +65,12 @@ class Load {
         }).catch(error => { throw error });
         return result;
     }
-    async update(id, data) {
+    async update(id, obj) {
+        let data = {};
+        if (obj.statusShipping) data.statusShipping = obj.statusShipping;
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
+        //handle notification here
+        //this.notifyOnLoadStatusChanged(id, data.statusShipping);
         return result;
     }
     async getLoad(id, { truck }) {
@@ -104,15 +113,15 @@ class Load {
     }
     async getSearchNewLoads(pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
-        if(filter.skidCount) clausesWhere.push(["skidCount", "==", filter.skidCount]);
-        if(filter.weight) clausesWhere.push(["weight", "==", filter.weight]);
+        if (filter.skidCount) clausesWhere.push(["skidCount", "==", filter.skidCount]);
+        if (filter.weight) clausesWhere.push(["weight", "==", filter.weight]);
         let clausesOrderBy = [["createdAt", "desc"]];
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, clausesOrderBy, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
     async getSearchNewLoadsByName(pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
-        if(filter.loadItemName) {clausesWhere.push(["loadItemName", ">=", filter.loadItemName]);clausesWhere.push(["loadItemName", "<=", filter.loadItemName+'\uf8ff']);}
+        if (filter.loadItemName) { clausesWhere.push(["loadItemName", ">=", filter.loadItemName]); clausesWhere.push(["loadItemName", "<=", filter.loadItemName + '\uf8ff']); }
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, undefined, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
@@ -162,6 +171,10 @@ class Load {
     async deleteLoad(id) {
         const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });
         return result;
+    }
+    //***************Notification Handlers */
+    async notifyOnLoadStatusUpdate(loadId, status){
+
     }
 }
 

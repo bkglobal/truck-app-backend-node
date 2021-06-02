@@ -26,12 +26,10 @@ class UserController {
                 new User(data).save().then(() => {
                     return response(res, parseError(), { userId: uid });
                 }).catch(error => {
-                    console.log(error);
                     return response(res, parseError(error.code || "error"), {});
                 });
-            }).catch(error => { console.log(error);return response(res, parseError(error.code || "error"), {}); });
+            }).catch(error => { return response(res, parseError(error.code || "error"), {}); });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -116,14 +114,14 @@ class UserController {
         try {
             console.log("savePremiumPlan");
         } catch (error) {
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     async getPremiumPlans(req, res) {
         try {
             console.log("getPremiumPlans");
         } catch (error) {
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     //Queries
@@ -136,7 +134,7 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     async getUserQueries(req, res) {
@@ -150,7 +148,7 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     async getQuery(req, res) {
@@ -164,7 +162,7 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     async deleteQuery(req, res) {
@@ -178,7 +176,7 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     async getUsersQueries(req, res) {
@@ -187,12 +185,10 @@ class UserController {
             new Query({}).getAllUsersQueries().then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     async updateUserQueryReply(req, res) {
@@ -203,12 +199,10 @@ class UserController {
             new Query({}).updateUserQueryReply(queryId, req.body).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
-            return response(res, CODES.Bad_Request, { error });
+            return response(res, parseError('error'), {});
         }
     }
     //Controller as User
@@ -274,7 +268,6 @@ class UserController {
             new Load({}).getAllUserLoads(userId, requestedUser).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
@@ -291,7 +284,6 @@ class UserController {
             new Load({}).getCompletedUserLoads(userId, requestedUser, parseInt(pageSize), idStartAfter).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
@@ -308,7 +300,6 @@ class UserController {
             new Load({}).getInProgressUserLoads(userId, requestedUser, parseInt(pageSize), idStartAfter).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
@@ -326,11 +317,9 @@ class UserController {
             new Load({}).getLoad(loadId, requestedUser).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -345,7 +334,6 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -373,11 +361,9 @@ class UserController {
             new User({}).getAllTruckUsers(requestedUser, parseInt(pageSize), idStartAfter, req.body).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -391,11 +377,9 @@ class UserController {
             new User({}).getAllTruckUsersByName(requestedUser, parseInt(pageSize), idStartAfter, req.body).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -461,12 +445,9 @@ class UserController {
             new User({}).getMultipleUsers(requestedUser.favTruckUserIds).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
-
             return response(res, parseError('error'), {});
         }
     }
@@ -478,11 +459,9 @@ class UserController {
             new Load({}).getSearchNewLoads(parseInt(pageSize), idStartAfter, req.body).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || 'error'), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -493,11 +472,9 @@ class UserController {
             new Load({}).getSearchNewLoadsByName(parseInt(pageSize), idStartAfter, req.body).then((result) => {
                 return response(res, parseError(), result);
             }).catch(error => {
-                console.log(error);
                 return response(res, parseError(error.code || 'error'), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }
@@ -587,7 +564,6 @@ class UserController {
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
-            console.log(error);
             return response(res, parseError('error'), {});
         }
     }

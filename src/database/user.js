@@ -132,7 +132,7 @@ class User {
     }
     async getAllTruckUsersByName(requestedUser, pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["hasOwnTruck", "==", true]];
-        if (filter.truckerName) { clausesWhere.push(["name", ">=", filter.truckerName]); clausesWhere.push(["name", "<=", filter.truckerName + '\uf8ff']); }
+        if (filter.truckerName) { clausesWhere.push(["name", ">=", filter.truckerName.toLowerCase()]); clausesWhere.push(["name", "<=", filter.truckerName.toLowerCase() + '\uf8ff']); }
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, undefined, pageSize, docStartAfter).catch(error => { throw error });
         return result.map((data) => ({ ...data, isFavorite: requestedUser.favTruckUserIds.indexOf(data.id) > -1 }));
     }

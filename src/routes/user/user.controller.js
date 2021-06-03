@@ -493,9 +493,12 @@ class UserController {
             new Load({}).update(loadId, { truckUserId }).then(() => {
                 return response(res, parseError(), {});
             }).catch(error => {
+            //console.log(error);
+
                 return response(res, parseError(error.code || "error"), {});
             });
         } catch (error) {
+            console.log(error);
             return response(res, parseError('error'), {});
         }
     }

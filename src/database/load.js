@@ -67,6 +67,10 @@ class Load {
     }
     async update(id, obj) {
         let data = {};
+        if (obj.truckUserId) {
+            data.truckUserId = obj.truckUserId;
+            data.statusShipping = StatusShipping.BOOKED;
+        }
         if (obj.statusShipping) data.statusShipping = obj.statusShipping;
         const result = await firebaseFirestore.updateData(this.collection, id, data).catch(error => { throw error });
         //handle notification here
@@ -77,7 +81,7 @@ class Load {
         const result = await firebaseFirestore.getSingleData(this.collection, id).catch(error => { throw error });
         let postedUser = await new User({}).getSingleUser(result.userId);
         result["postedBy"] = { name: postedUser.name, id: postedUser.uid };
-        result["isFavorite"] = truck.favLoadIds ? (truck.favLoadIds.indexOf(id) > -1) : false;
+        result["isFavorite"] = truck && (truck.favLoadIds ? (truck.favLoadIds.indexOf(id) > -1) : false);
         return result;
     }
     async getMultipleLoads(ids) {
@@ -173,8 +177,19 @@ class Load {
         return result;
     }
     //***************Notification Handlers */
-    async notifyOnLoadStatusUpdate(loadId, status){
+    async notifyOnLoadStatusUpdate(loadId, status) {
+        let loadDetail = await this.getLoad(loadId, { truck: {} });
 
+        switch (status) {
+            case StatusShipping.BOOKED:
+                break;
+            case StatusShipping.DESTINATION:
+                break;
+            case StatusShipping.DELIVERED:
+                break;
+            case StatusShipping.COMPLETED:
+                break;
+        }
     }
 }
 

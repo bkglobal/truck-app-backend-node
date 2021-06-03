@@ -160,5 +160,11 @@ class User {
         const result = await firebaseFirestore.deleteDoc(this.collection, id).catch(error => { throw error });
         return result;
     }
+    async notifyUserByUid(uid, title, body){
+        if(!uid) return;
+        let user = await new User({}).getSingleUser(uid);
+        if(!user || !user.fcmToken) return;
+        await firebaseMessaging.sendDeviceNotification(token, title, body).catch(error => { console.log(error); });
+    }
 }
 module.exports = User;

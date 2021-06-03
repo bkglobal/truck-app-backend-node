@@ -125,7 +125,9 @@ class Load {
     }
     async getSearchNewLoadsByName(pageSize, docStartAfter, filter = {}) {
         let clausesWhere = [["statusShipping", "==", StatusShipping.NEW]];
-        if (filter.loadItemName) { clausesWhere.push(["loadItemName", ">=", filter.loadItemName]); clausesWhere.push(["loadItemName", "<=", filter.loadItemName + '\uf8ff']); }
+        console.log(filter.loadItemName.toLowerCase());
+        if (filter.loadItemName) { clausesWhere.push(["loadItemName", ">=", filter.loadItemName.toLowerCase()]); clausesWhere.push(["loadItemName", "<=", filter.loadItemName.toLowerCase() + '\uf8ff']); }
+        console.log(clausesWhere);
         let result = await firebaseFirestore.getPaginatedData(this.collection, clausesWhere, undefined, pageSize, docStartAfter).catch(error => { throw error });
         return result;
     }
@@ -179,17 +181,25 @@ class Load {
     //***************Notification Handlers */
     async notifyOnLoadStatusUpdate(loadId, status) {
         let loadDetail = await this.getLoad(loadId, { truck: {} });
-
+        let title = "Load update " + loadDetail.loadItemName;
+        let body = "";
         switch (status) {
             case StatusShipping.BOOKED:
+                body = "Your load is booked!";
                 break;
             case StatusShipping.DESTINATION:
+                body = "Your load is en-route to destination!";
                 break;
             case StatusShipping.DELIVERED:
+                body = "Your load has been delivered!";
                 break;
             case StatusShipping.COMPLETED:
+                body = "Your load has been completed!";
                 break;
+            default:
+                body = "Your load is on the way!"
         }
+        new User({}).notifyUserByUid(loadDetail.userId, title, body);
     }
 }
 
